@@ -14,11 +14,14 @@ class Queue(object):
     def pop(self, item):
         return self._queue.pop()
 
+# It may be unnecessary to differentiate these, but we might want to add some
+# additional logic that doesn't fit into a generic queue class.
+
 class SeatingQueue(Queue):
     pass
 
-class TicketQueue(Queue):
+class IncomingOrderQueue(Queue):
     pass
 
-class DrinkQueue(Queue):
+class OutgoingOrderQueue(Queue):
     pass

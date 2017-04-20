@@ -23,6 +23,7 @@ def getopts():
         # Average time in seconds between arrival events (= 1 / mu)
         # Default: 20 per hour = 1 per 3 minutes = 180 seconds between arrivals
         'arrival_time' : 180,
+        'num_servers'  : 2,
     }
 
     parser = argparse.ArgumentParser(
@@ -49,6 +50,12 @@ def getopts():
         dest='arrival_time',
         help='The average time between customer arrivals, equal to the inverse'
              ' of the average rate.'
+    )
+    parser.add_argument(
+        '--num-servers',
+        type=util.positive_int_arg,
+        dest='num_servers',
+        help='The number of servers.'
     )
     return parser.parse_args()
 
@@ -85,17 +92,29 @@ def main():
         bar = Bar()
         # Various queues
         seating_queue = queues.SeatingQueue()
-        ticket_queue  = queues.TicketQueue()
-        drink_queue   = queues.DrinkQueue()
+        incoming_orders = queues.OrderQueue()
+        outgoing_orders = queues.DrinkQueue()
         # Stats collection
         stats.append({})
 
+        # Add an event signaling the end of happy hour
         events.push(HappyHourEnd(time=constants.HAPPY_HOUR_END))
+
+        # Generate customer arrival events
         stats[day]['arrivals'] = 0
         for arrival in generate_arrivals(opts.arrival_time):
             events.push(arrival)
             stats[day]['arrivals'] += 1
         LOGGER.info('Generated %d arrivals', stats[day]['arrivals'])
+
+        # Set up initial server idle events
+        for _ in range(0, opts.num_servers):
+            events.push(
+                ServerIdle(
+                    time=constants.HAPPY_HOUR_START,
+                    server=person.Server()
+                )
+            )
 
         while events:
             event = events.pop()
@@ -105,10 +124,13 @@ def main():
                 break
             elif isinstance(event, Arrival):
                 LOGGER.info(
-                    '%s added to seating queue',
-                    str(event.get_person())
+                    '%s added to seating queue at %s',
+                    str(event.get_person()),
+                    sec_to_tod(event.get_time())
                 )
                 seating_queue.push(event.get_person())
+            elif isinstance(event, ServerIdle):
+                ... # TODO
             else:
                 raise RuntimeError('Unhandled event: ' + str(event))
         # End of event loop
@@ -128,7 +150,10 @@ def generate_arrivals(mean_time):
         arrival_time = numpy.random.exponential(scale=mean_time)
         time += arrival_time
         if time + constants.HAPPY_HOUR_START < constants.HAPPY_HOUR_END:
-            yield Arrival(time=time, person=person.Customer())
+            yield Arrival(
+                time=time + constants.HAPPY_HOUR_START,
+                person=person.Customer()
+            )
         else:
             break
 # End of generate_arrivals()
