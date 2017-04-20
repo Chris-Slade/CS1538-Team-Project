@@ -3,7 +3,8 @@
 import heapq
 
 import util
-from customer import Customer
+
+from person import Person
 
 class EventQueue(object):
     """A priority queue for Events."""
@@ -84,27 +85,45 @@ class HappyHourEnd(Event):
     """Event for when happy hour ends."""
     pass
 
-############################### Customer Events ###############################
+########################### Events that have people ###########################
 
-class CustomerEvent(Event):
-    """An event with a customer, which has a reference in the event object."""
+class PersonEvent(Event):
+    """An event with a person, which has a reference in the event object."""
 
-    def __init__(self, time, customer):
+    def __init__(self, time, person):
         super().__init__(time=time)
-        assert customer is None or isinstance(customer, Customer), \
-            'Need a customer'
-        self._customer = customer
+        assert person is None or isinstance(person, Person), \
+            'Need a person'
+        self._person = person
 
-    def get_customer(self):
-        return self._customer
+    def get_person(self):
+        return self._person
 
     def __repr__(self):
         return '<{}: {} at {}>'.format(
             self.__class__.__name__,
-            self._customer,
+            self._person,
             util.sec_to_tod(self._time)
         )
 
+############################### Customer Events ###############################
+
+class CustomerEvent(PersonEvent):
+    pass
+
 class Arrival(CustomerEvent):
     """Customer arrived."""
+    pass
+
+################################ Server Events ################################
+
+class ServerEvent(PersonEvent):
+    def __init__(self, time, server):
+        super().__init__(time=time, person=server)
+
+class ServerIdle(ServerEvent):
+    pass
+
+class SeatCustomer(ServerEvent):
+    """Server gives a customer a seat."""
     pass
