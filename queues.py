@@ -11,8 +11,11 @@ class Queue(object):
     def push(self, item):
         self._queue.appendleft(item)
 
-    def pop(self, item):
+    def pop(self):
         return self._queue.pop()
+
+    def __len__(self):
+        return self._queue.__len__()
 
 # It may be unnecessary to differentiate these, but we might want to add some
 # additional logic that doesn't fit into a generic queue class.
