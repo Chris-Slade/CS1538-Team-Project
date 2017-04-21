@@ -17,6 +17,7 @@ from util import tod_to_sec, sec_to_tod
 LOGGER = None
 
 def getopts():
+    """Parse program command line arguments."""
     defaults = {
         'log_level'    : 'WARNING',
         'days'         : 1,
@@ -60,6 +61,7 @@ def getopts():
     return parser.parse_args()
 
 def init(opts):
+    """Initialize the global state of the sim, such as the logger."""
     global LOGGER
     level = util.get_log_level(opts.log_level)
     if level is None:
@@ -78,6 +80,7 @@ def init(opts):
     LOGGER.info('Initialized logger (level is %s)', opts.log_level)
 
 def main():
+    """Entry point of the simulation program."""
     global LOGGER
     opts = getopts()
     init(opts)
