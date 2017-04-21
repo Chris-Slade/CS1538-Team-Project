@@ -19,14 +19,22 @@ from util import tod_to_sec, sec_to_tod
 LOGGER = None
 
 def getopts():
-    """Parse program command line arguments."""
+    """Parse program command line arguments.
+
+    Options get their default settings from the values in constants.py. If an
+    option is specified on the command line, it will take precedence over the
+    default definition.
+    """
     defaults = {
-        'log_level'    : 'WARNING',
-        'days'         : 1,
-        # Average time in seconds between arrival events (= 1 / mu)
-        # Default: 20 per hour = 1 per 3 minutes = 180 seconds between arrivals
-        'arrival_time' : 180,
-        'num_servers'  : 2,
+        'log_level'             : 'WARNING',
+        'days'                  : 1,
+        'arrival_time'          : constants.AVG_ARRIVAL_TIME,
+        'num_servers'           : constants.NUM_SERVERS,
+        'num_bartenders'        : constants.NUM_BARTENDERS,
+        'num_bar_seats'         : constants.NUM_BAR_SEATS,
+        'seating_time'          : constants.AVG_SEATING_TIME,
+        'drinks_wanted_mean'    : constants.DRINKS_WANTED_MEAN,
+        'drinks_wanted_std_dev' : constants.DRINKS_WANTED_STD_DEV,
     }
 
     parser = argparse.ArgumentParser(
@@ -60,7 +68,20 @@ def getopts():
         dest='num_servers',
         help='The number of servers.'
     )
-    return parser.parse_args()
+
+    opts = parser.parse_args()
+
+    # Override constants with those changed in the command line options.
+    constants.AVG_ARRIVAL_TIME      = opts.arrival_time
+    constants.NUM_SERVERS           = opts.num_servers
+    constants.NUM_BARTENDERS        = opts.num_bartenders
+    constants.NUM_BAR_SEATS         = opts.num_bar_seats
+    constants.AVG_SEATING_TIME      = opts.seating_time
+    constants.DRINKS_WANTED_MEAN    = opts.drinks_wanted_mean
+    constants.DRINKS_WANTED_STD_DEV = opts.drinks_wanted_std_dev
+
+    return opts
+# End of getopts()
 
 def init(opts):
     """Initialize the global state of the sim, such as the logger."""
