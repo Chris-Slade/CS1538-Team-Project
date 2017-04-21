@@ -5,11 +5,11 @@ import logging
 import numpy.random
 import time as time_mod
 
+from collections import deque
 from random import random as rand
 
 import constants
 import person
-import queues
 import util
 
 from bar import Bar
@@ -117,9 +117,9 @@ def main():
         # Bar
         bar = Bar()
         # Various queues
-        seating_queue = queues.SeatingQueue()
-        incoming_orders = queues.IncomingOrderQueue()
-        outgoing_orders = queues.OutgoingOrderQueue()
+        seating_queue   = deque()
+        incoming_orders = deque()
+        outgoing_orders = deque()
         # Stats collection
         stats.append({})
 
@@ -162,7 +162,7 @@ def main():
                     str(event.get_person()),
                     sec_to_tod(event.get_time())
                 )
-                seating_queue.push(event.get_person())
+                seating_queue.appendleft(event.get_person())
             elif isinstance(event, ServerIdle):
                 # If both queues are empty, wait around for 30 seconds
                 if not seating_queue and not outgoing_orders:
@@ -237,7 +237,7 @@ def main():
 
             elif isinstance(event, OrderDrink):
                 LOGGER.info(event)
-                incoming_orders.push(
+                incoming_orders.appendleft(
                     ( event.get_customer(), event.drink_type() )
                 )
 
@@ -271,7 +271,7 @@ def main():
 
             elif isinstance(event, PreppedDrink):
                 LOGGER.info(event)
-                outgoing_orders.push(event.get_order())
+                outgoing_orders.appendleft(event.get_order())
 
             elif isinstance(event, DeliverDrink):
                 customer = event.get_customer()
