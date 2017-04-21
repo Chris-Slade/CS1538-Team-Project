@@ -125,6 +125,7 @@ def main():
             event = events.pop()
 
             if isinstance(event, HappyHourEnd):
+                LOGGER.info(event)
                 # Can collect stats, clean up, etc. here
                 break
             elif isinstance(event, Arrival):
@@ -135,7 +136,68 @@ def main():
                 )
                 seating_queue.push(event.get_person())
             elif isinstance(event, ServerIdle):
-                ... # TODO
+                # If both queues are empty, wait around for 30 seconds
+                if not seating_queue and not outgoing_orders:
+                    events.push(
+                        ServerIdle(
+                            time = event.get_time() + 30,
+                            server=event.get_server()
+                        )
+                    )
+                    continue
+
+                time        = event.get_time()
+                server      = event.get_server()
+                time_offset = None
+                customer    = None
+
+                # Take a customer from the seating queue and seat him at the
+                # bar.
+                if (
+                    bar.available_seats() > 0
+                    and handle_seating_queue(
+                        len(seating_queue),
+                        len(outgoing_orders)
+                    )
+                ):
+                    time_offset = random_seating_time()
+                    customer = seating_queue.pop()
+                    assert customer.drinks_wanted() >= 1, \
+                        "New arrival doesn't want any drinks"
+                    # Customer orders a drink after being seated.
+                    events.push(
+                        OrderDrink(
+                            time=time + time_offset,
+                            customer=customer,
+                            drink_type=drinks.random_drink()
+                        )
+                    )
+                    # Seat is taken at the start of the seating process to
+                    # prevent it from being preempted.
+                    bar.seat_customer(customer)
+                    # Server becomes idle after seating the customer.
+                    events.push(ServerIdle(time=time + time_offset, server=server))
+                    LOGGER.info(
+                        '%s was taken from seating line by %s at %s to be'
+                        ' seated at %s',
+                        str(customer),
+                        str(server),
+                        sec_to_tod(time),
+                        sec_to_tod(time + time_offset)
+                    )
+                # If not handling the seating queue, handle the outgoing drink
+                # queue.
+                else:
+                    ... # TODO
+                # Clean namespace
+                del time, time_offset, customer, server
+
+            elif isinstance(event, OrderDrink):
+                LOGGER.info(event)
+                incoming_orders.push(
+                    ( event.get_customer(), event.drink_type() )
+                )
+
             else:
                 raise RuntimeError('Unhandled event: ' + str(event))
         # End of event loop

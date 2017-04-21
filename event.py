@@ -84,7 +84,8 @@ class TimeEvent(Event):
 
 class HappyHourEnd(Event):
     """Event for when happy hour ends."""
-    pass
+    def __str__(self):
+        return 'Happy hour ended at {}'.format(util.sec_to_tod(self.get_time()))
 
 ########################### Events that have people ###########################
 
@@ -118,7 +119,11 @@ CustomerEvent.get_customer = CustomerEvent.get_person
 
 class Arrival(CustomerEvent):
     """Customer arrived."""
-    pass
+    def __str__(self):
+        return '{} arrived at {}'.format(
+            self.get_customer(),
+            util.sec_to_tod(self.get_customer())
+        )
 
 class OrderDrink(CustomerEvent):
     """Customer orders a drink."""
@@ -130,6 +135,13 @@ class OrderDrink(CustomerEvent):
     def drink_type(self):
         return self._drink_type
 
+    def __str__(self):
+        return '{} ordered a {} drink at {}'.format(
+            self.get_customer(),
+            self.drink_type().name,
+            util.sec_to_tod(self.get_time())
+        )
+
 ################################ Server Events ################################
 
 class ServerEvent(PersonEvent):
@@ -139,8 +151,8 @@ class ServerEvent(PersonEvent):
 ServerEvent.get_server = ServerEvent.get_person
 
 class ServerIdle(ServerEvent):
-    pass
-
-class SeatCustomer(ServerEvent):
-    """Server gives a customer a seat."""
-    pass
+    def __str__(self):
+        return '{} is idle at {}'.format(
+            self.get_server(),
+            util.sec_to_tod(self.get_time())
+        )
