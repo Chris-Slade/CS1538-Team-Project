@@ -20,7 +20,18 @@ class Customer(Person):
 
     @staticmethod
     def decide_drinks_wanted():
-        return int(abs(round(numpy.random.normal(2, 1))))
+        drinks_wanted = int(abs(round(numpy.random.normal(2, 1))))
+        if drinks_wanted == 0:
+            drinks_wanted = 1
+        return drinks_wanted
+
+    def drinks_wanted(self):
+        """Get the number of drinks the customer wants."""
+        return self._drinks_wanted
+
+    def drink(self):
+        """Make the customer drink (i.e. decrement drinks wanted)."""
+        self._drinks_wanted -= 1
 
 class Server(Person):
     ... # TODO

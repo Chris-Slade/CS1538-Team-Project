@@ -109,7 +109,11 @@ class PersonEvent(Event):
 ############################### Customer Events ###############################
 
 class CustomerEvent(PersonEvent):
-    pass
+    def __init__(self, time, customer):
+        super().__init__(time=time, person=customer)
+
+# Alias the get_person() method
+CustomerEvent.get_customer = CustomerEvent.get_person
 
 class Arrival(CustomerEvent):
     """Customer arrived."""
@@ -120,6 +124,8 @@ class Arrival(CustomerEvent):
 class ServerEvent(PersonEvent):
     def __init__(self, time, server):
         super().__init__(time=time, person=server)
+
+ServerEvent.get_server = ServerEvent.get_person
 
 class ServerIdle(ServerEvent):
     pass

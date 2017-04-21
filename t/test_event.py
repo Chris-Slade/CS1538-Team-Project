@@ -1,13 +1,14 @@
 import unittest
+import unittest.mock as mock
 
 from event import *
-from person import Customer
+from person import Customer, Server
 
 class TestEvent(unittest.TestCase):
 
     def test_hierarchy(self):
         time = 0
-        customer = Customer()
+        customer = mock.Mock(Customer)
         cust_event = CustomerEvent(time, customer)
         self.assertIsInstance(cust_event, Event)
 
@@ -16,9 +17,19 @@ class TestEvent(unittest.TestCase):
         self.assertEqual(event.get_time(), 5)
 
     def test_customer(self):
-        customer = Customer()
-        event = CustomerEvent(time=5, person=customer)
+        customer = mock.Mock(Customer)
+        event = CustomerEvent(time=5, customer=customer)
         self.assertIs(event.get_person(), customer)
+
+    def test_get_customer(self):
+        customer = mock.Mock(Customer)
+        event = CustomerEvent(time=5, customer=customer)
+        self.assertIs(event.get_person(), event.get_customer())
+
+    def test_get_server(self):
+        server = mock.Mock(Server)
+        event = ServerEvent(time=5, server=server)
+        self.assertIs(event.get_person(), event.get_server())
 
 class TestEventQueue(unittest.TestCase):
 

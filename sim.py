@@ -155,7 +155,7 @@ def generate_arrivals(mean_time):
         if time + constants.HAPPY_HOUR_START < constants.HAPPY_HOUR_END:
             yield Arrival(
                 time=time + constants.HAPPY_HOUR_START,
-                person=person.Customer()
+                customer=person.Customer()
             )
         else:
             break
