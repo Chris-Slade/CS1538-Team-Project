@@ -44,6 +44,7 @@ class Customer(Person):
 
 class Server(Person):
     def __init__(self, skill=1):
+        super().__init__()
         self._skill = skill
 
     def get_skill(self):
@@ -56,4 +57,5 @@ class Server(Person):
         )))
 
 class Bartender(Person):
-    ... # TODO
+    def __init__(self):
+        super().__init__()
