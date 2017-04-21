@@ -1,5 +1,9 @@
 import numpy.random
 
+import constants
+
+from constants import DRINKS_WANTED_MEAN, DRINKS_WANTED_STD_DEV
+
 class Person(object):
     _number = 1
 
@@ -20,7 +24,12 @@ class Customer(Person):
 
     @staticmethod
     def decide_drinks_wanted():
-        drinks_wanted = int(abs(round(numpy.random.normal(2, 1))))
+        drinks_wanted = int(abs(round(
+            numpy.random.normal(
+                DRINKS_WANTED_MEAN,
+                DRINKS_WANTED_STD_DEV
+            )
+        )))
         if drinks_wanted == 0:
             drinks_wanted = 1
         return drinks_wanted
@@ -34,7 +43,17 @@ class Customer(Person):
         self._drinks_wanted -= 1
 
 class Server(Person):
-    ... # TODO
+    def __init__(self, skill=1):
+        self._skill = skill
+
+    def get_skill(self):
+        return self._skill
+
+    @staticmethod
+    def get_seating_time():
+        return int(abs(round(
+            numpy.random.exponential(constants.AVG_SEATING_TIME)
+        )))
 
 class Bartender(Person):
     ... # TODO

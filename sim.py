@@ -160,7 +160,7 @@ def main():
                         len(outgoing_orders)
                     )
                 ):
-                    time_offset = random_seating_time()
+                    time_offset = person.Server.get_seating_time()
                     customer = seating_queue.pop()
                     assert customer.drinks_wanted() >= 1, \
                         "New arrival doesn't want any drinks"
@@ -213,9 +213,6 @@ def main():
     )
 
 # End of main()
-
-def random_seating_time(avg_seating_time=constants.AVG_SEATING_TIME):
-    return numpy.random.exponential(avg_seating_time)
 
 def handle_seating_queue(waiting_customers, outgoing_orders):
     """Choose whether to handle the seating queue or the outgoing order queue.
