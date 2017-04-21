@@ -168,7 +168,7 @@ def main():
                 if not seating_queue and not outgoing_orders:
                     events.push(
                         ServerIdle(
-                            time = event.get_time() + 30,
+                            time=event.get_time() + 30,
                             server=event.get_server()
                         )
                     )
