@@ -90,7 +90,7 @@ case BartenderIdle:
     order     ← incoming_order_queue.pop()
     customer  ← order.customer
     prep_time ← order.drink_type.prep_time()
-    events.push(FinishedOrder(time=time + prep_time, order=order)
+    events.push(PreppedDrink(time=time + prep_time, order=order)
     events.push(BartenderIdle(time=time + prep_time, bartender=bartender)
   else:
     events.push(BartenderIdle(time=event.get_time() + 30))

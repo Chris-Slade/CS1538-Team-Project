@@ -133,12 +133,19 @@ def main():
             stats[day]['arrivals'] += 1
         LOGGER.info('Generated %d arrivals', stats[day]['arrivals'])
 
-        # Set up initial server idle events
-        for _ in range(0, opts.num_servers):
+        # Set up initial server and bartender idle events
+        for _ in range(0, constants.NUM_SERVERS):
             events.push(
                 ServerIdle(
                     time=constants.HAPPY_HOUR_START,
                     server=person.Server()
+                )
+            )
+        for _ in range(0, constants.NUM_BARTENDERS):
+            events.push(
+                BartenderIdle(
+                    time=constants.HAPPY_HOUR_START,
+                    bartender=person.Bartender()
                 )
             )
 
@@ -218,14 +225,43 @@ def main():
                 # Clean namespace
                 del time, time_offset, customer, server
 
-            elif isinstance(event, BartenderIdle):
-                ... # TODO
-
             elif isinstance(event, OrderDrink):
                 LOGGER.info(event)
                 incoming_orders.push(
                     ( event.get_customer(), event.drink_type() )
                 )
+
+            elif isinstance(event, BartenderIdle):
+                # Wait around for 30 seconds if there are no incoming orders.
+                if not incoming_orders:
+                    events.push(
+                        BartenderIdle(time=event.get_time() + 30,
+                        bartender=event.get_bartender())
+                    )
+                    continue
+                # Otherwise take an order and prepare it.
+                order = incoming_orders.pop()
+                assert isinstance(order[0], person.Customer)
+                assert isinstance(order[1], drinks.Drink)
+                LOGGER.info(
+                    '%s is preparing a %s drink for %s at %s',
+                    event.get_bartender(),
+                    order[1].name,
+                    order[0],
+                    sec_to_tod(event.get_time())
+                )
+                prep_time = order[1].prep_time()
+                events.push(
+                    PreppedDrink(
+                        time=event.get_time() + prep_time,
+                        order=order
+                    )
+                )
+                del order
+
+            elif isinstance(event, PreppedDrink):
+                LOGGER.info(event)
+                outgoing_orders.push(event.get_order())
 
             else:
                 raise RuntimeError('Unhandled event: ' + str(event))
