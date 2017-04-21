@@ -3,7 +3,9 @@
 import argparse
 import logging
 import numpy.random
-import time
+import time as time_mod
+
+from random import random as rand
 
 import constants
 import person
@@ -84,7 +86,7 @@ def main():
     global LOGGER
     opts = getopts()
     init(opts)
-    start_time = time.time()
+    start_time = time_mod.time()
 
     stats = []
 
@@ -138,7 +140,10 @@ def main():
                 raise RuntimeError('Unhandled event: ' + str(event))
         # End of event loop
 
-    LOGGER.info('Simulation complete (%f seconds)', time.time() - start_time)
+    LOGGER.info(
+        'Simulation complete (%f seconds)',
+        time_mod.time() - start_time
+    )
 
 # End of main()
 
