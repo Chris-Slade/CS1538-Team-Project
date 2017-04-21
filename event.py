@@ -2,6 +2,7 @@
 
 import heapq
 
+import drinks
 import util
 
 from person import Person
@@ -118,6 +119,16 @@ CustomerEvent.get_customer = CustomerEvent.get_person
 class Arrival(CustomerEvent):
     """Customer arrived."""
     pass
+
+class OrderDrink(CustomerEvent):
+    """Customer orders a drink."""
+    def __init__(self, time, customer, drink_type):
+        super().__init__(time=time, customer=customer)
+        assert isinstance(drink_type, drinks.Drink)
+        self._drink_type = drink_type
+
+    def drink_type(self):
+        return self._drink_type
 
 ################################ Server Events ################################
 

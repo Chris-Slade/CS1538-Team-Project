@@ -142,6 +142,27 @@ def main():
 
 # End of main()
 
+def random_seating_time(avg_seating_time=constants.AVG_SEATING_TIME):
+    return numpy.random.exponential(avg_seating_time)
+
+def handle_seating_queue(waiting_customers, outgoing_orders):
+    """Choose whether to handle the seating queue or the outgoing order queue.
+
+    If there are X customers waiting for seating and Y outgoing orders, the
+    probability of the server choosing to seat a customer is X / (X + Y). This
+    has some nice properties, namely that the limit as X goes to infinity is
+    1, the limit as Y goes to infinity is 0, and when either goes to 0 the
+    probability of choosing the opposite approaches 1.
+
+    Arguments:
+
+    - waiting_customers: The number of customers waiting to be seated (i.e. the
+      length of the seating queue).
+    - outgoing_orders: The number of orders ready to be delivered (i.e. the
+      length of the outgoing order queue).
+    """
+    return rand() < waiting_customers / (waiting_customers + outgoing_orders)
+
 def generate_arrivals(mean_time):
     """Generate customer arrivals according to an exponential distribution.
 
