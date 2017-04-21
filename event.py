@@ -122,7 +122,7 @@ class Arrival(CustomerEvent):
     def __str__(self):
         return '{} arrived at {}'.format(
             self.get_customer(),
-            util.sec_to_tod(self.get_customer())
+            util.sec_to_tod(self.get_time())
         )
 
 class Departure(CustomerEvent):
