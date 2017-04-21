@@ -296,6 +296,10 @@ def main():
 
                 del customer, drink_time
 
+            elif isinstance(event, Departure):
+                LOGGER.info(event)
+                bar.remove_customer(event.get_customer())
+
             else:
                 raise RuntimeError('Unhandled event: ' + str(event))
         # End of event loop
