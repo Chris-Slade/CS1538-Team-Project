@@ -125,6 +125,14 @@ class Arrival(CustomerEvent):
             util.sec_to_tod(self.get_customer())
         )
 
+class Departure(CustomerEvent):
+    """Customer departed."""
+    def __str__(self):
+        return '{} departed at {}'.format(
+            self.get_customer(),
+            util.sec_to_tod(self.get_time())
+        )
+
 class OrderDrink(CustomerEvent):
     """Customer orders a drink."""
     def __init__(self, time, customer, drink_type):

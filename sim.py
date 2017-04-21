@@ -273,6 +273,29 @@ def main():
                 LOGGER.info(event)
                 outgoing_orders.push(event.get_order())
 
+            elif isinstance(event, DeliverDrink):
+                customer = event.get_customer()
+                customer.drink() # Decrement drinks wanted
+                drink_time = numpy.random.exponential(constants.AVG_DRINK_TIME)
+                if customer.drinks_wanted() > 0:
+                    events.push(
+                        OrderDrink(
+                            time=event.get_time() + drink_time,
+                            customer=customer,
+                            drink_type=drinks.random_drink()
+                        )
+                    )
+                else:
+                    # Customer leaves after drinking last drink
+                    events.push(
+                        Departure(
+                            time=event.get_time() + drink_time,
+                            customer=customer
+                        )
+                    )
+
+                del customer, drink_time
+
             else:
                 raise RuntimeError('Unhandled event: ' + str(event))
         # End of event loop
