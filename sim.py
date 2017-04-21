@@ -157,15 +157,19 @@ def main():
                 # Can collect stats, clean up, etc. here
                 break
             elif isinstance(event, Arrival):
-                LOGGER.info(
-                    '%s added to seating queue at %s',
-                    str(event.get_person()),
-                    sec_to_tod(event.get_time())
-                )
+                LOGGER.info(event)
                 seating_queue.appendleft(event.get_person())
             elif isinstance(event, ServerIdle):
                 # If both queues are empty, wait around for 30 seconds
-                if not seating_queue and not outgoing_orders:
+                if (
+                    (not seating_queue or bar.available_seats() <= 0)
+                    and not outgoing_orders
+                ):
+                    LOGGER.info(
+                        '%s has nothing to do at %s',
+                        event.get_server(),
+                        sec_to_tod(event.get_time())
+                    )
                     events.push(
                         ServerIdle(
                             time=event.get_time() + 30,
@@ -231,6 +235,12 @@ def main():
                         DeliverDrink(
                             time=event.get_time() + delivery_time,
                             customer=order[0]
+                        )
+                    )
+                    events.push(
+                        ServerIdle(
+                            time=event.get_time() + delivery_time,
+                            server=event.get_server()
                         )
                     )
                     del order
