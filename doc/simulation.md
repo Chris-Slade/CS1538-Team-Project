@@ -41,7 +41,7 @@ the drink.
 
 Pseudocode:
 
-```bash
+```
 # Initialize state variables
 seating_queue        ← new queue()
 incoming_order_queue ← new queue()
@@ -73,4 +73,25 @@ while event ← events.pop():
     case OrderDrink:
       customer ← event.get_customer()
       order_queue.push(new DrinkOrder(type=random_type(), customer=customer))
+```
+
+# Bartenders
+
+Bartenders can become idle like servers. Unlike servers, bartenders only have
+one action to perform: preparing drinks.
+
+Pseudocode:
+
+```
+# Inside event loop
+case BartenderIdle:
+  if incoming_order_queue is not empty:
+    bartender ← event.get_bartender()
+    order     ← incoming_order_queue.pop()
+    customer  ← order.customer
+    prep_time ← order.drink_type.prep_time()
+    events.push(FinishedOrder(time=time + prep_time, order=order)
+    events.push(BartenderIdle(time=time + prep_time, bartender=bartender)
+  else:
+    events.push(BartenderIdle(time=event.get_time() + 30))
 ```
