@@ -97,8 +97,8 @@ def main():
         bar = Bar()
         # Various queues
         seating_queue = queues.SeatingQueue()
-        incoming_orders = queues.OrderQueue()
-        outgoing_orders = queues.DrinkQueue()
+        incoming_orders = queues.IncomingOrderQueue()
+        outgoing_orders = queues.OutgoingOrderQueue()
         # Stats collection
         stats.append({})
 
