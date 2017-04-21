@@ -43,4 +43,4 @@ class BarFullError(Exception):
     pass
 
 class CustomerNotPresentError(Exception):
-    pass 
+    pass
