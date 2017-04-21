@@ -188,6 +188,11 @@ def main():
                 # If not handling the seating queue, handle the outgoing drink
                 # queue.
                 else:
+                    LOGGER.info(
+                        '%s is serving drinks at %s',
+                        event.get_server(),
+                        sec_to_tod(event.get_time())
+                    )
                     ... # TODO
                 # Clean namespace
                 del time, time_offset, customer, server
