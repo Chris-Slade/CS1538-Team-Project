@@ -1,5 +1,5 @@
 import numpy.random
-
+from constants import DRINKS_ORDERED_MEAN,DRINKS_ORDERED_STD_DEV
 class Customer(object):
 
     def __init__(self):
@@ -7,4 +7,4 @@ class Customer(object):
 
     @staticmethod
     def decide_drinks_wanted():
-        return int(abs(round(numpy.random.normal(2, 1))))
+        return int(abs(round(numpy.random.normal(DRINKS_ORDERED_MEAN, DRINKS_ORDERED_STD_DEV))))

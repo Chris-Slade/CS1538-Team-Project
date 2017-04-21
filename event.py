@@ -4,6 +4,8 @@ import heapq
 
 import util
 from customer import Customer
+from server import Server
+
 
 class EventQueue(object):
     """A priority queue for Events."""
@@ -108,3 +110,17 @@ class CustomerEvent(Event):
 class Arrival(CustomerEvent):
     """Customer arrived."""
     pass
+
+############################### Server Events ###############################
+
+class ServerIdleEvent(Event):
+    """An event which handles server being idle"""
+
+    def __init__(self, time, server):
+        super().__init__(time=time)
+        assert server is None or isinstance(server, Server), \
+            'Need a server'
+        self._server = server
+
+    def seating_time_offset(self):
+        return self._server.get_seating_time()
