@@ -218,6 +218,9 @@ def main():
                 # Clean namespace
                 del time, time_offset, customer, server
 
+            elif isinstance(event, BartenderIdle):
+                ... # TODO
+
             elif isinstance(event, OrderDrink):
                 LOGGER.info(event)
                 incoming_orders.push(

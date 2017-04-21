@@ -144,15 +144,29 @@ class OrderDrink(CustomerEvent):
 
 ################################ Server Events ################################
 
+class IdleEventMixin(object):
+    def __str__(self):
+        return '{} is idle at {}'.format(
+            self.get_person(),
+            util.sec_to_tod(self.get_time())
+        )
+
 class ServerEvent(PersonEvent):
     def __init__(self, time, server):
         super().__init__(time=time, person=server)
 
 ServerEvent.get_server = ServerEvent.get_person
 
-class ServerIdle(ServerEvent):
-    def __str__(self):
-        return '{} is idle at {}'.format(
-            self.get_server(),
-            util.sec_to_tod(self.get_time())
-        )
+class ServerIdle(ServerEvent, IdleEventMixin):
+    pass
+
+############################## Bartender Events ###############################
+
+class BartenderEvent(PersonEvent):
+    def __init__(self, time, bartender):
+        super().__init__(time=time, person=bartender)
+
+BartenderEvent.get_bartender = BartenderEvent.get_person
+
+class BartenderIdle(BartenderEvent, IdleEventMixin):
+    pass
