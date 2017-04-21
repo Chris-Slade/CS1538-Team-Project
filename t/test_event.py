@@ -1,7 +1,7 @@
 import unittest
 
 from event import *
-from customer import Customer
+from person import Customer
 
 class TestEvent(unittest.TestCase):
 
@@ -17,8 +17,8 @@ class TestEvent(unittest.TestCase):
 
     def test_customer(self):
         customer = Customer()
-        event = CustomerEvent(time=5, customer=customer)
-        self.assertIs(event.get_customer(), customer)
+        event = CustomerEvent(time=5, person=customer)
+        self.assertIs(event.get_person(), customer)
 
 class TestEventQueue(unittest.TestCase):
 

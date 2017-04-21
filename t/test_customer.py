@@ -2,8 +2,8 @@
 
 import unittest
 
-import customer
-from customer import Customer
+import person
+from person import Customer
 
 class TestCustomer(unittest.TestCase):
 
