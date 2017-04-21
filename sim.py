@@ -174,11 +174,6 @@ def main():
                     )
                     continue
 
-                time        = event.get_time()
-                server      = event.get_server()
-                time_offset = None
-                customer    = None
-
                 # Take a customer from the seating queue and seat him at the
                 # bar.
                 if (
@@ -188,8 +183,10 @@ def main():
                         len(outgoing_orders)
                     )
                 ):
+                    time        = event.get_time()
+                    server      = event.get_server()
                     time_offset = person.Server.get_seating_time()
-                    customer = seating_queue.pop()
+                    customer    = seating_queue.pop()
                     assert customer.drinks_wanted() >= 1, \
                         "New arrival doesn't want any drinks"
                     # Customer orders a drink after being seated.
@@ -213,6 +210,8 @@ def main():
                         sec_to_tod(time),
                         sec_to_tod(time + time_offset)
                     )
+                    # Clean namespace
+                    del time, server, time_offset, customer
                 # If not handling the seating queue, handle the outgoing drink
                 # queue.
                 else:
@@ -221,9 +220,20 @@ def main():
                         event.get_server(),
                         sec_to_tod(event.get_time())
                     )
-                    ... # TODO
-                # Clean namespace
-                del time, time_offset, customer, server
+                    assert outgoing_orders, 'No outgoing orders!'
+                    # Server takes the order from the outgoing queue...
+                    order = outgoing_orders.pop()
+                    delivery_time = numpy.random.exponential(
+                        constants.AVG_DRINK_DELIVERY_TIME
+                    )
+                    # ... and delivers it to the customer
+                    events.push(
+                        DeliverDrink(
+                            time=event.get_time() + delivery_time,
+                            customer=order[0]
+                        )
+                    )
+                    del order
 
             elif isinstance(event, OrderDrink):
                 LOGGER.info(event)

@@ -142,6 +142,16 @@ class OrderDrink(CustomerEvent):
             util.sec_to_tod(self.get_time())
         )
 
+class DeliverDrink(CustomerEvent):
+    """Drink delivered to customer. NB: Server doesn't have to be contained in
+    this event.
+    """
+    def __str__(self):
+        return 'Drink was delivered to {} at {}'.format(
+            self.get_customer(),
+            util.sec_to_tod(self.get_time())
+        )
+
 ################################ Server Events ################################
 
 class IdleEventMixin(object):
