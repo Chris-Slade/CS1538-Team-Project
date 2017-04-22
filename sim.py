@@ -68,6 +68,36 @@ def getopts():
         dest='num_servers',
         help='The number of servers.'
     )
+    parser.add_argument(
+        '--num-bartenders',
+        type=util.positive_int_arg,
+        dest='num_bartenders',
+        help='The number of bartenders.'
+    )
+    parser.add_argument(
+        '--num-bar-seats',
+        type=util.positive_int_arg,
+        dest='num_bar_seats',
+        help='The number of seats at the bar.'
+    )
+    parser.add_argument(
+        '--seating-time',
+        type=util.positive_arg,
+        dest='seating_time',
+        help='The average time it takes to be seated by a server.'
+    )
+    parser.add_argument(
+        '--drinks-wanted-mean',
+        type=util.positive_arg,
+        dest='drinks_wanted_mean',
+        help='The average number of drinks wanted.'
+    )
+    parser.add_argument(
+        '--drinks-wanted-std-dev',
+        type=util.positive_arg,
+        dest='drinks_wanted_std_dev',
+        help='The standard deviation of drinks wanted.'
+    )
 
     opts = parser.parse_args()
 
