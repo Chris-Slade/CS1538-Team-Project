@@ -122,7 +122,15 @@ class Arrival(CustomerEvent):
     def __str__(self):
         return '{} arrived at {}'.format(
             self.get_customer(),
-            util.sec_to_tod(self.get_customer())
+            util.sec_to_tod(self.get_time())
+        )
+
+class Departure(CustomerEvent):
+    """Customer departed."""
+    def __str__(self):
+        return '{} departed at {}'.format(
+            self.get_customer(),
+            util.sec_to_tod(self.get_time())
         )
 
 class OrderDrink(CustomerEvent):
@@ -136,13 +144,31 @@ class OrderDrink(CustomerEvent):
         return self._drink_type
 
     def __str__(self):
-        return '{} ordered a {} drink at {}'.format(
+        return '{} ordered a {} drink (wants {} more) at {}'.format(
             self.get_customer(),
             self.drink_type().name,
+            self.get_customer().drinks_wanted(),
+            util.sec_to_tod(self.get_time())
+        )
+
+class DeliverDrink(CustomerEvent):
+    """Drink delivered to customer. NB: Server doesn't have to be contained in
+    this event.
+    """
+    def __str__(self):
+        return 'Drink was delivered to {} at {}'.format(
+            self.get_customer(),
             util.sec_to_tod(self.get_time())
         )
 
 ################################ Server Events ################################
+
+class IdleEventMixin(object):
+    def __str__(self):
+        return '{} is idle at {}'.format(
+            self.get_person(),
+            util.sec_to_tod(self.get_time())
+        )
 
 class ServerEvent(PersonEvent):
     def __init__(self, time, server):
@@ -150,9 +176,33 @@ class ServerEvent(PersonEvent):
 
 ServerEvent.get_server = ServerEvent.get_person
 
-class ServerIdle(ServerEvent):
+class ServerIdle(ServerEvent, IdleEventMixin):
+    pass
+
+############################## Bartender Events ###############################
+
+class BartenderEvent(PersonEvent):
+    def __init__(self, time, bartender):
+        super().__init__(time=time, person=bartender)
+
+BartenderEvent.get_bartender = BartenderEvent.get_person
+
+class BartenderIdle(BartenderEvent, IdleEventMixin):
+    pass
+
+################################ Miscellaneous ################################
+
+class PreppedDrink(Event):
+    def __init__(self, time, order):
+        super().__init__(time=time)
+        self._order = order
+
+    def get_order(self):
+        return self._order
+
     def __str__(self):
-        return '{} is idle at {}'.format(
-            self.get_server(),
+        return 'Order of {} drink for {} prepared at {}'.format(
+            self.get_order()[1].name,
+            self.get_order()[0],
             util.sec_to_tod(self.get_time())
         )

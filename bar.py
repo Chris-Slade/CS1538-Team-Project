@@ -6,11 +6,10 @@ class Bar(object):
     Not technically needed for the simulation, but this information is useful
     to keep track of for visualization inter alia.
     """
-    NUM_SEATS = constants.NUM_BAR_SEATS
-
-    def __init__(self):
+    def __init__(self, num_seats=constants.NUM_BAR_SEATS):
+        self.NUM_SEATS = num_seats
         self._seated_customers = 0
-        self._seats = [None] * Bar.NUM_SEATS
+        self._seats = [None] * self.NUM_SEATS
 
     def available_seats(self):
         """Return the number of available seats."""
@@ -25,19 +24,25 @@ class Bar(object):
         """
         if self.available_seats() < 1:
             raise BarFullError("Can't seat customer when bar is full")
+        seated_customer = False
         for i, seat in enumerate(self._seats):
             if seat is None:
                 self._seats[i] = customer
                 self._seated_customers += 1
+                seated_customer = True
                 break
+        assert seated_customer
 
     def remove_customer(self, customer):
-        try:
-            removed = self._seats.remove(customer)
-        except ValueError:
-            raise CustomerNotPresentError('Customer is not present at bar')
-        self._seated_customers -= 1
-        return removed
+        for i, seat in enumerate(self._seats):
+            if customer == self._seats[i]:
+                self._seats[i] = None
+                self._seated_customers -= 1
+                return customer
+        raise CustomerNotPresentError('%s is not present at bar' % customer)
+
+    def __str__(self):
+        return self._seats.__str__()
 
 class BarFullError(Exception):
     pass

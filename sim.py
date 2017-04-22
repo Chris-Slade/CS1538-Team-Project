@@ -5,11 +5,11 @@ import logging
 import numpy.random
 import time as time_mod
 
+from collections import deque
 from random import random as rand
 
 import constants
 import person
-import queues
 import util
 
 from bar import Bar
@@ -19,14 +19,24 @@ from util import tod_to_sec, sec_to_tod
 LOGGER = None
 
 def getopts():
-    """Parse program command line arguments."""
+    """Parse program command line arguments.
+
+    Options get their default settings from the values in constants.py. If an
+    option is specified on the command line, it will take precedence over the
+    default definition.
+    """
     defaults = {
-        'log_level'    : 'WARNING',
-        'days'         : 1,
-        # Average time in seconds between arrival events (= 1 / mu)
-        # Default: 20 per hour = 1 per 3 minutes = 180 seconds between arrivals
-        'arrival_time' : 180,
-        'num_servers'  : 2,
+        'log_level'             : 'WARNING',
+        'days'                  : 1,
+        'arrival_time'          : constants.AVG_ARRIVAL_TIME,
+        'num_servers'           : constants.NUM_SERVERS,
+        'num_bartenders'        : constants.NUM_BARTENDERS,
+        'num_bar_seats'         : constants.NUM_BAR_SEATS,
+        'seating_time'          : constants.AVG_SEATING_TIME,
+        'delivery_time'         : constants.AVG_DRINK_DELIVERY_TIME,
+        'drink_time'            : constants.AVG_DRINK_TIME,
+        'drinks_wanted_mean'    : constants.DRINKS_WANTED_MEAN,
+        'drinks_wanted_std_dev' : constants.DRINKS_WANTED_STD_DEV,
     }
 
     parser = argparse.ArgumentParser(
@@ -60,7 +70,65 @@ def getopts():
         dest='num_servers',
         help='The number of servers.'
     )
-    return parser.parse_args()
+    parser.add_argument(
+        '--num-bartenders',
+        type=util.positive_int_arg,
+        dest='num_bartenders',
+        help='The number of bartenders.'
+    )
+    parser.add_argument(
+        '--num-bar-seats',
+        type=util.positive_int_arg,
+        dest='num_bar_seats',
+        help='The number of seats at the bar.'
+    )
+    parser.add_argument(
+        '--seating-time',
+        type=util.positive_arg,
+        dest='seating_time',
+        help='The average time it takes to be seated by a server.'
+    )
+    parser.add_argument(
+        '--delivery-time',
+        type=util.positive_arg,
+        dest='delivery_time',
+        help='The average time it takes for a server to deliver a prepared'
+            ' drink.'
+    )
+    parser.add_argument(
+        '--drink-time',
+        type=util.positive_arg,
+        dest='drink_time',
+        help='The average time it takes to drink a drink.'
+    )
+    parser.add_argument(
+        '--drinks-wanted-mean',
+        type=util.positive_arg,
+        dest='drinks_wanted_mean',
+        help='The average number of drinks wanted.'
+    )
+    parser.add_argument(
+        '--drinks-wanted-std-dev',
+        type=util.positive_arg,
+        dest='drinks_wanted_std_dev',
+        help='The standard deviation of drinks wanted.'
+    )
+
+    opts = parser.parse_args()
+
+    # Override constants with those changed in the command line options.
+    constants.AVG_ARRIVAL_TIME        = opts.arrival_time
+    constants.NUM_SERVERS             = opts.num_servers
+    constants.NUM_BARTENDERS          = opts.num_bartenders
+    constants.NUM_BAR_SEATS           = opts.num_bar_seats
+    constants.AVG_SEATING_TIME        = opts.seating_time
+    constants.AVG_DRINK_TIME          = opts.drink_time
+    constants.AVG_DRINK_DELIVERY_TIME = opts.delivery_time
+    constants.DRINKS_WANTED_MEAN      = opts.drinks_wanted_mean
+    constants.DRINKS_WANTED_STD_DEV   = opts.drinks_wanted_std_dev
+
+    return opts
+# End of getopts()
 
 def init(opts):
     """Initialize the global state of the sim, such as the logger."""
@@ -88,17 +156,24 @@ def main():
     init(opts)
     start_time = time_mod.time()
 
+    cons = {}
+    for constant in dir(constants):
+        if constant[0].isupper():
+            cons[constant] = getattr(constants, constant)
+    LOGGER.info(cons)
+    del cons
+
     stats = []
 
     for day in range(0, opts.days):
         # Main event queue, holds events of different types.
         events = EventQueue()
         # Bar
-        bar = Bar()
+        bar = Bar(num_seats=opts.num_bar_seats)
         # Various queues
-        seating_queue = queues.SeatingQueue()
-        incoming_orders = queues.IncomingOrderQueue()
-        outgoing_orders = queues.OutgoingOrderQueue()
+        seating_queue   = deque()
+        incoming_orders = deque()
+        outgoing_orders = deque()
         # Stats collection
         stats.append({})
 
@@ -112,12 +187,19 @@ def main():
             stats[day]['arrivals'] += 1
         LOGGER.info('Generated %d arrivals', stats[day]['arrivals'])
 
-        # Set up initial server idle events
+        # Set up initial server and bartender idle events
         for _ in range(0, opts.num_servers):
             events.push(
                 ServerIdle(
                     time=constants.HAPPY_HOUR_START,
                     server=person.Server()
+                )
+            )
+        for _ in range(0, opts.num_bartenders):
+            events.push(
+                BartenderIdle(
+                    time=constants.HAPPY_HOUR_START,
+                    bartender=person.Bartender()
                 )
             )
 
@@ -129,27 +211,26 @@ def main():
                 # Can collect stats, clean up, etc. here
                 break
             elif isinstance(event, Arrival):
-                LOGGER.info(
-                    '%s added to seating queue at %s',
-                    str(event.get_person()),
-                    sec_to_tod(event.get_time())
-                )
-                seating_queue.push(event.get_person())
+                LOGGER.info(event)
+                seating_queue.appendleft(event.get_person())
             elif isinstance(event, ServerIdle):
                 # If both queues are empty, wait around for 30 seconds
-                if not seating_queue and not outgoing_orders:
+                if (
+                    (not seating_queue or bar.available_seats() <= 0)
+                    and not outgoing_orders
+                ):
+                    LOGGER.debug(
+                        '%s has nothing to do at %s',
+                        event.get_server(),
+                        sec_to_tod(event.get_time())
+                    )
                     events.push(
                         ServerIdle(
-                            time = event.get_time() + 30,
+                            time=event.get_time() + 30,
                             server=event.get_server()
                         )
                     )
                     continue
-
-                time        = event.get_time()
-                server      = event.get_server()
-                time_offset = None
-                customer    = None
 
                 # Take a customer from the seating queue and seat him at the
                 # bar.
@@ -160,8 +241,10 @@ def main():
                         len(outgoing_orders)
                     )
                 ):
-                    time_offset = person.Server.get_seating_time()
-                    customer = seating_queue.pop()
+                    time        = event.get_time()
+                    server      = event.get_server()
+                    time_offset = person.Server.get_seating_time(opts.seating_time)
+                    customer    = seating_queue.pop()
                     assert customer.drinks_wanted() >= 1, \
                         "New arrival doesn't want any drinks"
                     # Customer orders a drink after being seated.
@@ -175,6 +258,7 @@ def main():
                     # Seat is taken at the start of the seating process to
                     # prevent it from being preempted.
                     bar.seat_customer(customer)
+                    LOGGER.debug('Bar: %s', bar)
                     # Server becomes idle after seating the customer.
                     events.push(ServerIdle(time=time + time_offset, server=server))
                     LOGGER.info(
@@ -185,6 +269,8 @@ def main():
                         sec_to_tod(time),
                         sec_to_tod(time + time_offset)
                     )
+                    # Clean namespace
+                    del time, server, time_offset, customer
                 # If not handling the seating queue, handle the outgoing drink
                 # queue.
                 else:
@@ -193,15 +279,101 @@ def main():
                         event.get_server(),
                         sec_to_tod(event.get_time())
                     )
-                    ... # TODO
-                # Clean namespace
-                del time, time_offset, customer, server
+                    assert outgoing_orders, 'No outgoing orders!'
+                    # Server takes the order from the outgoing queue...
+                    order = outgoing_orders.pop()
+                    delivery_time = numpy.random.exponential(opts.delivery_time)
+                    # ... and delivers it to the customer
+                    events.push(
+                        DeliverDrink(
+                            time=event.get_time() + delivery_time,
+                            customer=order[0]
+                        )
+                    )
+                    events.push(
+                        ServerIdle(
+                            time=event.get_time() + delivery_time,
+                            server=event.get_server()
+                        )
+                    )
+                    del order
 
             elif isinstance(event, OrderDrink):
                 LOGGER.info(event)
-                incoming_orders.push(
+                incoming_orders.appendleft(
                     ( event.get_customer(), event.drink_type() )
                 )
+
+            elif isinstance(event, BartenderIdle):
+                # Wait around for 30 seconds if there are no incoming orders.
+                if not incoming_orders:
+                    events.push(
+                        BartenderIdle(time=event.get_time() + 30,
+                        bartender=event.get_bartender())
+                    )
+                    continue
+                # Otherwise take an order and prepare it.
+                order = incoming_orders.pop()
+                assert isinstance(order[0], person.Customer)
+                assert isinstance(order[1], drinks.Drink)
+                LOGGER.info(
+                    '%s is preparing a %s drink for %s at %s',
+                    event.get_bartender(),
+                    order[1].name,
+                    order[0],
+                    sec_to_tod(event.get_time())
+                )
+                prep_time = order[1].prep_time()
+                events.push(
+                    PreppedDrink(
+                        time=event.get_time() + prep_time,
+                        order=order
+                    )
+                )
+                events.push(
+                    BartenderIdle(
+                        time=event.get_time() + prep_time,
+                        bartender=event.get_bartender()
+                    )
+                )
+                del order
+
+            elif isinstance(event, PreppedDrink):
+                LOGGER.info(event)
+                outgoing_orders.appendleft(event.get_order())
+
+            elif isinstance(event, DeliverDrink):
+                customer = event.get_customer()
+                customer.drink() # Decrement drinks wanted
+                drink_time = numpy.random.exponential(opts.drink_time)
+                LOGGER.info(
+                    '%s served drink at %s',
+                    customer,
+                    sec_to_tod(event.get_time())
+                )
+                if customer.drinks_wanted() > 0:
+                    events.push(
+                        OrderDrink(
+                            time=event.get_time() + drink_time,
+                            customer=customer,
+                            drink_type=drinks.random_drink()
+                        )
+                    )
+                else:
+                    # Customer leaves after drinking last drink
+                    events.push(
+                        Departure(
+                            time=event.get_time() + drink_time,
+                            customer=customer
+                        )
+                    )
+
+                del customer, drink_time
+
+            elif isinstance(event, Departure):
+                LOGGER.info(event)
+                LOGGER.debug('Bar: %s', bar)
+                bar.remove_customer(event.get_customer())
 
             else:
                 raise RuntimeError('Unhandled event: ' + str(event))

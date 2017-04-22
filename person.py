@@ -15,7 +15,7 @@ class Person(object):
         return str(self)
 
     def __str__(self):
-        return "{} {:3d}".format(self.__class__.__name__, self._number)
+        return "{} {:d}".format(self.__class__.__name__, self._number)
 
 class Customer(Person):
     def __init__(self):
@@ -44,16 +44,18 @@ class Customer(Person):
 
 class Server(Person):
     def __init__(self, skill=1):
+        super().__init__()
         self._skill = skill
 
     def get_skill(self):
         return self._skill
 
     @staticmethod
-    def get_seating_time():
+    def get_seating_time(avg_time=constants.AVG_SEATING_TIME):
         return int(abs(round(
-            numpy.random.exponential(constants.AVG_SEATING_TIME)
+            numpy.random.exponential(avg_time)
         )))
 
 class Bartender(Person):
-    ... # TODO
+    def __init__(self):
+        super().__init__()
