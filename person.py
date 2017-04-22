@@ -51,9 +51,9 @@ class Server(Person):
         return self._skill
 
     @staticmethod
-    def get_seating_time():
+    def get_seating_time(avg_time=constants.AVG_SEATING_TIME):
         return int(abs(round(
-            numpy.random.exponential(constants.AVG_SEATING_TIME)
+            numpy.random.exponential(avg_time)
         )))
 
 class Bartender(Person):

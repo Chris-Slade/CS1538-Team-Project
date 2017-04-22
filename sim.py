@@ -33,6 +33,8 @@ def getopts():
         'num_bartenders'        : constants.NUM_BARTENDERS,
         'num_bar_seats'         : constants.NUM_BAR_SEATS,
         'seating_time'          : constants.AVG_SEATING_TIME,
+        'delivery_time'         : constants.AVG_DRINK_DELIVERY_TIME,
+        'drink_time'            : constants.AVG_DRINK_TIME,
         'drinks_wanted_mean'    : constants.DRINKS_WANTED_MEAN,
         'drinks_wanted_std_dev' : constants.DRINKS_WANTED_STD_DEV,
     }
@@ -87,6 +89,19 @@ def getopts():
         help='The average time it takes to be seated by a server.'
     )
     parser.add_argument(
+        '--delivery-time',
+        type=util.positive_arg,
+        dest='delivery_time',
+        help='The average time it takes for a server to deliver a prepared'
+            ' drink.'
+    )
+    parser.add_argument(
+        '--drink-time',
+        type=util.positive_arg,
+        dest='drink_time',
+        help='The average time it takes to drink a drink.'
+    )
+    parser.add_argument(
         '--drinks-wanted-mean',
         type=util.positive_arg,
         dest='drinks_wanted_mean',
@@ -102,13 +117,15 @@ def getopts():
     opts = parser.parse_args()
 
     # Override constants with those changed in the command line options.
-    constants.AVG_ARRIVAL_TIME      = opts.arrival_time
-    constants.NUM_SERVERS           = opts.num_servers
-    constants.NUM_BARTENDERS        = opts.num_bartenders
-    constants.NUM_BAR_SEATS         = opts.num_bar_seats
-    constants.AVG_SEATING_TIME      = opts.seating_time
-    constants.DRINKS_WANTED_MEAN    = opts.drinks_wanted_mean
-    constants.DRINKS_WANTED_STD_DEV = opts.drinks_wanted_std_dev
+    constants.AVG_ARRIVAL_TIME        = opts.arrival_time
+    constants.NUM_SERVERS             = opts.num_servers
+    constants.NUM_BARTENDERS          = opts.num_bartenders
+    constants.NUM_BAR_SEATS           = opts.num_bar_seats
+    constants.AVG_SEATING_TIME        = opts.seating_time
+    constants.AVG_DRINK_TIME          = opts.drink_time
+    constants.AVG_DRINK_DELIVERY_TIME = opts.delivery_time
+    constants.DRINKS_WANTED_MEAN      = opts.drinks_wanted_mean
+    constants.DRINKS_WANTED_STD_DEV   = opts.drinks_wanted_std_dev
 
     return opts
 # End of getopts()
@@ -139,13 +156,20 @@ def main():
     init(opts)
     start_time = time_mod.time()
 
+    cons = {}
+    for constant in dir(constants):
+        if constant[0].isupper():
+            cons[constant] = getattr(constants, constant)
+    LOGGER.info(cons)
+    del cons
+
     stats = []
 
     for day in range(0, opts.days):
         # Main event queue, holds events of different types.
         events = EventQueue()
         # Bar
-        bar = Bar()
+        bar = Bar(num_seats=opts.num_bar_seats)
         # Various queues
         seating_queue   = deque()
         incoming_orders = deque()
@@ -164,14 +188,14 @@ def main():
         LOGGER.info('Generated %d arrivals', stats[day]['arrivals'])
 
         # Set up initial server and bartender idle events
-        for _ in range(0, constants.NUM_SERVERS):
+        for _ in range(0, opts.num_servers):
             events.push(
                 ServerIdle(
                     time=constants.HAPPY_HOUR_START,
                     server=person.Server()
                 )
             )
-        for _ in range(0, constants.NUM_BARTENDERS):
+        for _ in range(0, opts.num_bartenders):
             events.push(
                 BartenderIdle(
                     time=constants.HAPPY_HOUR_START,
@@ -219,7 +243,7 @@ def main():
                 ):
                     time        = event.get_time()
                     server      = event.get_server()
-                    time_offset = person.Server.get_seating_time()
+                    time_offset = person.Server.get_seating_time(opts.seating_time)
                     customer    = seating_queue.pop()
                     assert customer.drinks_wanted() >= 1, \
                         "New arrival doesn't want any drinks"
@@ -257,9 +281,7 @@ def main():
                     assert outgoing_orders, 'No outgoing orders!'
                     # Server takes the order from the outgoing queue...
                     order = outgoing_orders.pop()
-                    delivery_time = numpy.random.exponential(
-                        constants.AVG_DRINK_DELIVERY_TIME
-                    )
+                    delivery_time = numpy.random.exponential(opts.delivery_time)
                     # ... and delivers it to the customer
                     events.push(
                         DeliverDrink(
@@ -316,7 +338,7 @@ def main():
             elif isinstance(event, DeliverDrink):
                 customer = event.get_customer()
                 customer.drink() # Decrement drinks wanted
-                drink_time = numpy.random.exponential(constants.AVG_DRINK_TIME)
+                drink_time = numpy.random.exponential(opts.drink_time)
                 LOGGER.info(
                     '%s served drink at %s',
                     customer,
