@@ -144,9 +144,10 @@ class OrderDrink(CustomerEvent):
         return self._drink_type
 
     def __str__(self):
-        return '{} ordered a {} drink at {}'.format(
+        return '{} ordered a {} drink (wants {} more) at {}'.format(
             self.get_customer(),
             self.drink_type().name,
+            self.get_customer().drinks_wanted(),
             util.sec_to_tod(self.get_time())
         )
 

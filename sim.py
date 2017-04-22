@@ -165,7 +165,7 @@ def main():
                     (not seating_queue or bar.available_seats() <= 0)
                     and not outgoing_orders
                 ):
-                    LOGGER.info(
+                    LOGGER.debug(
                         '%s has nothing to do at %s',
                         event.get_server(),
                         sec_to_tod(event.get_time())
@@ -287,6 +287,11 @@ def main():
                 customer = event.get_customer()
                 customer.drink() # Decrement drinks wanted
                 drink_time = numpy.random.exponential(constants.AVG_DRINK_TIME)
+                LOGGER.info(
+                    '%s served drink at %s',
+                    customer,
+                    sec_to_tod(event.get_time())
+                )
                 if customer.drinks_wanted() > 0:
                     events.push(
                         OrderDrink(
