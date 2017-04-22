@@ -329,6 +329,12 @@ def main():
                         order=order
                     )
                 )
+                events.push(
+                    BartenderIdle(
+                        time=event.get_time() + prep_time,
+                        bartender=event.get_bartender()
+                    )
+                )
                 del order
 
             elif isinstance(event, PreppedDrink):
