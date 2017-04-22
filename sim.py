@@ -258,6 +258,7 @@ def main():
                     # Seat is taken at the start of the seating process to
                     # prevent it from being preempted.
                     bar.seat_customer(customer)
+                    LOGGER.debug('Bar: %s', bar)
                     # Server becomes idle after seating the customer.
                     events.push(ServerIdle(time=time + time_offset, server=server))
                     LOGGER.info(
@@ -371,6 +372,7 @@ def main():
 
             elif isinstance(event, Departure):
                 LOGGER.info(event)
+                LOGGER.debug('Bar: %s', bar)
                 bar.remove_customer(event.get_customer())
 
             else:

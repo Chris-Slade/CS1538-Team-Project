@@ -15,7 +15,7 @@ class Person(object):
         return str(self)
 
     def __str__(self):
-        return "{} {:3d}".format(self.__class__.__name__, self._number)
+        return "{} {:d}".format(self.__class__.__name__, self._number)
 
 class Customer(Person):
     def __init__(self):
