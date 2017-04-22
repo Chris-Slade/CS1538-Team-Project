@@ -49,13 +49,13 @@ def getopts():
         '--days',
         type=util.positive_int_arg,
         dest='days',
-        help='Number of days to simulate. (default: 100)'
+        help='Number of days to simulate. (default: %s)' % defaults['days']
     )
     parser.add_argument(
         '-l', '--log-level',
         choices='DEBUG INFO WARNING ERROR CRITICAL'.split(),
         dest='log_level',
-        help='Set the global logging level. (default: WARNING)'
+        help='Set the global logging level. (default: %s)' % defaults['log_level']
     )
     parser.add_argument(
         '--arrival-time',
