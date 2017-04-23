@@ -5,7 +5,7 @@ import logging
 import numpy.random
 import time as time_mod
 
-from collections import deque
+from collections import deque, defaultdict
 from random import random as rand
 
 import constants
@@ -32,6 +32,8 @@ def getopts():
         'num_servers'           : constants.NUM_SERVERS,
         'num_bartenders'        : constants.NUM_BARTENDERS,
         'num_bar_seats'         : constants.NUM_BAR_SEATS,
+        'server_wwi'            : constants.SERVER_WWI,
+        'bartender_wwi'         : constants.BARTENDER_WWI,
         'seating_time'          : constants.AVG_SEATING_TIME,
         'delivery_time'         : constants.AVG_DRINK_DELIVERY_TIME,
         'drink_time'            : constants.AVG_DRINK_TIME,
@@ -77,6 +79,20 @@ def getopts():
         help='The number of bartenders.'
     )
     parser.add_argument(
+        '--server-wwi',
+        type=util.positive_int_arg,
+        dest='server_wwi',
+        help="How long in seconds servers wait when there's nothing to do"
+            ' before trying to do something again.'
+    )
+    parser.add_argument(
+        '--bartender-wwi',
+        type=util.positive_int_arg,
+        dest='bartender_wwi',
+        help="How long in seconds bartenders wait when there's nothing to do"
+            ' before trying to do something again.'
+    )
+    parser.add_argument(
         '--num-bar-seats',
         type=util.positive_int_arg,
         dest='num_bar_seats',
@@ -120,6 +136,8 @@ def getopts():
     constants.AVG_ARRIVAL_TIME        = opts.arrival_time
     constants.NUM_SERVERS             = opts.num_servers
     constants.NUM_BARTENDERS          = opts.num_bartenders
+    constants.SERVER_WWI              = opts.server_wwi
+    constants.BARTENDER_WWI           = opts.bartender_wwi
     constants.NUM_BAR_SEATS           = opts.num_bar_seats
     constants.AVG_SEATING_TIME        = opts.seating_time
     constants.AVG_DRINK_TIME          = opts.drink_time
@@ -175,13 +193,19 @@ def main():
         incoming_orders = deque()
         outgoing_orders = deque()
         # Stats collection
-        stats.append({})
+        stats.append({
+            'arrivals' : 0,
+            'drinks_served' : 0,
+            'server_idle_time' : defaultdict(int),
+            'bartender_idle_time' : defaultdict(int),
+            'seating_wait_time' : util.Averager(),
+            'drink_wait_time' : util.Averager(),
+        })
 
         # Add an event signaling the end of happy hour
         events.push(HappyHourEnd(time=constants.HAPPY_HOUR_END))
 
         # Generate customer arrival events
-        stats[day]['arrivals'] = 0
         for arrival in generate_arrivals(opts.arrival_time):
             events.push(arrival)
             stats[day]['arrivals'] += 1
@@ -214,7 +238,7 @@ def main():
                 LOGGER.info(event)
                 seating_queue.appendleft(event.get_person())
             elif isinstance(event, ServerIdle):
-                # If both queues are empty, wait around for 30 seconds
+                # If both queues are empty, wait around for a bit
                 if (
                     (not seating_queue or bar.available_seats() <= 0)
                     and not outgoing_orders
@@ -226,10 +250,13 @@ def main():
                     )
                     events.push(
                         ServerIdle(
-                            time=event.get_time() + 30,
+                            time=event.get_time() + opts.server_wwi,
                             server=event.get_server()
                         )
                     )
+                    stats[day]['server_idle_time'][
+                        event.get_server().get_number()
+                    ] += opts.server_wwi
                     continue
 
                 # Take a customer from the seating queue and seat him at the
@@ -261,6 +288,9 @@ def main():
                     LOGGER.debug('Bar: %s', bar)
                     # Server becomes idle after seating the customer.
                     events.push(ServerIdle(time=time + time_offset, server=server))
+                    stats[day]['seating_wait_time'].add(
+                        time + time_offset - customer.get_arrival_time()
+                    )
                     LOGGER.info(
                         '%s was taken from seating line by %s at %s to be'
                         ' seated at %s',
@@ -287,8 +317,15 @@ def main():
                     events.push(
                         DeliverDrink(
                             time=event.get_time() + delivery_time,
-                            customer=order[0]
+                            customer=order.customer
                         )
+                    )
+                    # Track average wait time for a drink
+                    stats[day]['drink_wait_time'].add(
+                        # Time for a drink to be served = time of
+                        # DrinkDelivered event minus the time the order was
+                        # placed.
+                        event.get_time() + delivery_time - order.time_placed
                     )
                     events.push(
                         ServerIdle(
@@ -301,29 +338,38 @@ def main():
             elif isinstance(event, OrderDrink):
                 LOGGER.info(event)
                 incoming_orders.appendleft(
-                    ( event.get_customer(), event.drink_type() )
+                    drinks.Order(
+                        customer=event.get_customer(),
+                        drink_type=event.drink_type(),
+                        time_placed=event.get_time()
+                    )
                 )
 
             elif isinstance(event, BartenderIdle):
-                # Wait around for 30 seconds if there are no incoming orders.
+                # Wait around for a while if there are no incoming orders.
                 if not incoming_orders:
                     events.push(
-                        BartenderIdle(time=event.get_time() + 30,
-                        bartender=event.get_bartender())
+                        BartenderIdle(
+                            time=event.get_time() + opts.bartender_wwi,
+                            bartender=event.get_bartender()
+                        )
                     )
+                    stats[day]['bartender_idle_time'][
+                        event.get_bartender().get_number()
+                    ] += opts.bartender_wwi
                     continue
                 # Otherwise take an order and prepare it.
                 order = incoming_orders.pop()
-                assert isinstance(order[0], person.Customer)
-                assert isinstance(order[1], drinks.Drink)
+                assert isinstance(order.customer, person.Customer)
+                assert isinstance(order.drink_type, drinks.Drink)
                 LOGGER.info(
                     '%s is preparing a %s drink for %s at %s',
                     event.get_bartender(),
-                    order[1].name,
-                    order[0],
+                    order.drink_type.name,
+                    order.customer,
                     sec_to_tod(event.get_time())
                 )
-                prep_time = order[1].prep_time()
+                prep_time = order.drink_type.prep_time()
                 events.push(
                     PreppedDrink(
                         time=event.get_time() + prep_time,
@@ -345,6 +391,7 @@ def main():
             elif isinstance(event, DeliverDrink):
                 customer = event.get_customer()
                 customer.drink() # Decrement drinks wanted
+                stats[day]['drinks_served'] += 1
                 drink_time = numpy.random.exponential(opts.drink_time)
                 LOGGER.info(
                     '%s served drink at %s',
@@ -384,6 +431,8 @@ def main():
         time_mod.time() - start_time
     )
 
+    print(stats)
+
 # End of main()
 
 def handle_seating_queue(waiting_customers, outgoing_orders):
@@ -414,10 +463,11 @@ def generate_arrivals(mean_time):
     while True:
         arrival_time = numpy.random.exponential(scale=mean_time)
         time += arrival_time
-        if time + constants.HAPPY_HOUR_START < constants.HAPPY_HOUR_END:
+        time_of_day = time + constants.HAPPY_HOUR_START
+        if time_of_day < constants.HAPPY_HOUR_END:
             yield Arrival(
-                time=time + constants.HAPPY_HOUR_START,
-                customer=person.Customer()
+                time=time_of_day,
+                customer=person.Customer(arrival_time=time_of_day)
             )
         else:
             break

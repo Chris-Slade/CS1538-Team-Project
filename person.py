@@ -17,10 +17,14 @@ class Person(object):
     def __str__(self):
         return "{} {:d}".format(self.__class__.__name__, self._number)
 
+    def get_number(self):
+        return self._number
+
 class Customer(Person):
-    def __init__(self):
+    def __init__(self, arrival_time):
         super().__init__()
         self._drinks_wanted = Customer.decide_drinks_wanted()
+        self._arrival_time = arrival_time
 
     @staticmethod
     def decide_drinks_wanted():
@@ -41,6 +45,9 @@ class Customer(Person):
     def drink(self):
         """Make the customer drink (i.e. decrement drinks wanted)."""
         self._drinks_wanted -= 1
+
+    def get_arrival_time(self):
+        return self._arrival_time
 
 class Server(Person):
     def __init__(self, skill=1):

@@ -1,6 +1,7 @@
 import math
 import numpy.random
 
+from collections import namedtuple
 from enum import Enum
 from random import random as rand
 
@@ -30,3 +31,5 @@ def random_drink():
         return Drink.cocktail
     else:
         return Drink.pitcher
+
+Order = namedtuple('Order', 'customer drink_type time_placed')
