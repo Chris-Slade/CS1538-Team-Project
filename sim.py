@@ -180,6 +180,7 @@ def main():
             'drinks_served' : 0,
             'server_idle_time' : defaultdict(int),
             'seating_wait_time' : util.Averager(),
+            'drink_wait_time' : util.Averager(),
         })
 
         # Add an event signaling the end of happy hour
@@ -297,8 +298,15 @@ def main():
                     events.push(
                         DeliverDrink(
                             time=event.get_time() + delivery_time,
-                            customer=order[0]
+                            customer=order.customer
                         )
+                    )
+                    # Track average wait time for a drink
+                    stats[day]['drink_wait_time'].add(
+                        # Time for a drink to be served = time of
+                        # DrinkDelivered event minus the time the order was
+                        # placed.
+                        event.get_time() + delivery_time - order.time_placed
                     )
                     events.push(
                         ServerIdle(
@@ -311,7 +319,11 @@ def main():
             elif isinstance(event, OrderDrink):
                 LOGGER.info(event)
                 incoming_orders.appendleft(
-                    ( event.get_customer(), event.drink_type() )
+                    drinks.Order(
+                        customer=event.get_customer(),
+                        drink_type=event.drink_type(),
+                        time_placed=event.get_time()
+                    )
                 )
 
             elif isinstance(event, BartenderIdle):
@@ -324,16 +336,16 @@ def main():
                     continue
                 # Otherwise take an order and prepare it.
                 order = incoming_orders.pop()
-                assert isinstance(order[0], person.Customer)
-                assert isinstance(order[1], drinks.Drink)
+                assert isinstance(order.customer, person.Customer)
+                assert isinstance(order.drink_type, drinks.Drink)
                 LOGGER.info(
                     '%s is preparing a %s drink for %s at %s',
                     event.get_bartender(),
-                    order[1].name,
-                    order[0],
+                    order.drink_type.name,
+                    order.customer,
                     sec_to_tod(event.get_time())
                 )
-                prep_time = order[1].prep_time()
+                prep_time = order.drink_type.prep_time()
                 events.push(
                     PreppedDrink(
                         time=event.get_time() + prep_time,
