@@ -197,6 +197,7 @@ def main():
             'arrivals' : 0,
             'drinks_served' : 0,
             'server_idle_time' : defaultdict(int),
+            'bartender_idle_time' : defaultdict(int),
             'seating_wait_time' : util.Averager(),
             'drink_wait_time' : util.Averager(),
         })
@@ -345,12 +346,17 @@ def main():
                 )
 
             elif isinstance(event, BartenderIdle):
-                # Wait around for 30 seconds if there are no incoming orders.
+                # Wait around for a while if there are no incoming orders.
                 if not incoming_orders:
                     events.push(
-                        BartenderIdle(time=event.get_time() + 30,
-                        bartender=event.get_bartender())
+                        BartenderIdle(
+                            time=event.get_time() + opts.bartender_wwi,
+                            bartender=event.get_bartender()
+                        )
                     )
+                    stats[day]['bartender_idle_time'][
+                        event.get_bartender().get_number()
+                    ] += opts.bartender_wwi
                     continue
                 # Otherwise take an order and prepare it.
                 order = incoming_orders.pop()
