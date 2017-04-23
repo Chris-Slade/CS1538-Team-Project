@@ -20,6 +20,6 @@ lint:
 	pylint $(SRC) $(foreach i, $(PYLINT_IGNORE), -d $i)
 
 tags: $(SRC)
-	ctags $(SRC)
+	ctags $(SRC) Simulation-Graphical/script.js
 
 .PHONY: compile lint tags test view
