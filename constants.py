@@ -9,6 +9,11 @@ NUM_SERVERS = 2
 
 NUM_BARTENDERS = 2
 
+# How long servers and bartenders wait (in seconds) before trying to do
+# something again when there's nothing to do. (wwi = wait when idle.)
+SERVER_WWI = 30
+BARTENDER_WWI = 30
+
 NUM_BAR_SEATS = 20
 
 # Average time in seconds between arrival events (= 1 / mu) Default: 20 per

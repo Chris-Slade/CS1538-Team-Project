@@ -32,6 +32,8 @@ def getopts():
         'num_servers'           : constants.NUM_SERVERS,
         'num_bartenders'        : constants.NUM_BARTENDERS,
         'num_bar_seats'         : constants.NUM_BAR_SEATS,
+        'server_wwi'            : constants.SERVER_WWI,
+        'bartender_wwi'         : constants.BARTENDER_WWI,
         'seating_time'          : constants.AVG_SEATING_TIME,
         'delivery_time'         : constants.AVG_DRINK_DELIVERY_TIME,
         'drink_time'            : constants.AVG_DRINK_TIME,
@@ -77,6 +79,20 @@ def getopts():
         help='The number of bartenders.'
     )
     parser.add_argument(
+        '--server-wwi',
+        type=util.positive_int_arg,
+        dest='server_wwi',
+        help="How long in seconds servers wait when there's nothing to do"
+            ' before trying to do something again.'
+    )
+    parser.add_argument(
+        '--bartender-wwi',
+        type=util.positive_int_arg,
+        dest='bartender_wwi',
+        help="How long in seconds bartenders wait when there's nothing to do"
+            ' before trying to do something again.'
+    )
+    parser.add_argument(
         '--num-bar-seats',
         type=util.positive_int_arg,
         dest='num_bar_seats',
@@ -120,6 +136,8 @@ def getopts():
     constants.AVG_ARRIVAL_TIME        = opts.arrival_time
     constants.NUM_SERVERS             = opts.num_servers
     constants.NUM_BARTENDERS          = opts.num_bartenders
+    constants.SERVER_WWI              = opts.server_wwi
+    constants.BARTENDER_WWI           = opts.bartender_wwi
     constants.NUM_BAR_SEATS           = opts.num_bar_seats
     constants.AVG_SEATING_TIME        = opts.seating_time
     constants.AVG_DRINK_TIME          = opts.drink_time
@@ -219,7 +237,7 @@ def main():
                 LOGGER.info(event)
                 seating_queue.appendleft(event.get_person())
             elif isinstance(event, ServerIdle):
-                # If both queues are empty, wait around for 30 seconds
+                # If both queues are empty, wait around for a bit
                 if (
                     (not seating_queue or bar.available_seats() <= 0)
                     and not outgoing_orders
@@ -231,13 +249,13 @@ def main():
                     )
                     events.push(
                         ServerIdle(
-                            time=event.get_time() + 30,
+                            time=event.get_time() + opts.server_wwi,
                             server=event.get_server()
                         )
                     )
                     stats[day]['server_idle_time'][
                         event.get_server().get_number()
-                    ] += 30
+                    ] += opts.server_wwi
                     continue
 
                 # Take a customer from the seating queue and seat him at the
