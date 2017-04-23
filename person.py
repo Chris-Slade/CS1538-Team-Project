@@ -17,6 +17,9 @@ class Person(object):
     def __str__(self):
         return "{} {:d}".format(self.__class__.__name__, self._number)
 
+    def get_number(self):
+        return self._number
+
 class Customer(Person):
     def __init__(self):
         super().__init__()

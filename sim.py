@@ -5,7 +5,7 @@ import logging
 import numpy.random
 import time as time_mod
 
-from collections import deque
+from collections import deque, defaultdict
 from random import random as rand
 
 import constants
@@ -175,13 +175,16 @@ def main():
         incoming_orders = deque()
         outgoing_orders = deque()
         # Stats collection
-        stats.append({})
+        stats.append({
+            'arrivals' : 0,
+            'drinks_served' : 0,
+            'server_idle_time' : defaultdict(int),
+        })
 
         # Add an event signaling the end of happy hour
         events.push(HappyHourEnd(time=constants.HAPPY_HOUR_END))
 
         # Generate customer arrival events
-        stats[day]['arrivals'] = 0
         for arrival in generate_arrivals(opts.arrival_time):
             events.push(arrival)
             stats[day]['arrivals'] += 1
@@ -230,6 +233,9 @@ def main():
                             server=event.get_server()
                         )
                     )
+                    stats[day]['server_idle_time'][
+                        event.get_server().get_number()
+                    ] += 30
                     continue
 
                 # Take a customer from the seating queue and seat him at the
@@ -345,6 +351,7 @@ def main():
             elif isinstance(event, DeliverDrink):
                 customer = event.get_customer()
                 customer.drink() # Decrement drinks wanted
+                stats[day]['drinks_served'] += 1
                 drink_time = numpy.random.exponential(opts.drink_time)
                 LOGGER.info(
                     '%s served drink at %s',
@@ -383,6 +390,8 @@ def main():
         'Simulation complete (%f seconds)',
         time_mod.time() - start_time
     )
+
+    print(stats)
 
 # End of main()
 
