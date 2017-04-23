@@ -67,3 +67,23 @@ def positive_arg(value):
         raise ValueError()
     except ValueError:
         raise argparse.ArgumentTypeError('argument must be positive')
+
+class Averager(object):
+    """A class for efficiently computing averages of large data sets."""
+
+    def __init__(self):
+        self.a = 0
+        self.i = 0
+
+    def add(self, xi):
+        self.i += 1
+        self.a += (xi - self.a) / self.i
+
+    def get_avg(self):
+        return self.a
+
+    def __repr__(self):
+        return '{ "i" : %d, "avg" : %f }' % (self.i, self.a)
+
+    def __str__(self):
+        return str(self.a)

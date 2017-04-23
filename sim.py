@@ -179,6 +179,7 @@ def main():
             'arrivals' : 0,
             'drinks_served' : 0,
             'server_idle_time' : defaultdict(int),
+            'seating_wait_time' : util.Averager(),
         })
 
         # Add an event signaling the end of happy hour
@@ -267,6 +268,9 @@ def main():
                     LOGGER.debug('Bar: %s', bar)
                     # Server becomes idle after seating the customer.
                     events.push(ServerIdle(time=time + time_offset, server=server))
+                    stats[day]['seating_wait_time'].add(
+                        time + time_offset - customer.get_arrival_time()
+                    )
                     LOGGER.info(
                         '%s was taken from seating line by %s at %s to be'
                         ' seated at %s',
@@ -423,10 +427,11 @@ def generate_arrivals(mean_time):
     while True:
         arrival_time = numpy.random.exponential(scale=mean_time)
         time += arrival_time
-        if time + constants.HAPPY_HOUR_START < constants.HAPPY_HOUR_END:
+        time_of_day = time + constants.HAPPY_HOUR_START
+        if time_of_day < constants.HAPPY_HOUR_END:
             yield Arrival(
-                time=time + constants.HAPPY_HOUR_START,
-                customer=person.Customer()
+                time=time_of_day,
+                customer=person.Customer(arrival_time=time_of_day)
             )
         else:
             break
