@@ -135,18 +135,9 @@ class Departure(CustomerEvent):
 
 class OrderDrink(CustomerEvent):
     """Customer orders a drink."""
-    def __init__(self, time, customer, drink_type):
-        super().__init__(time=time, customer=customer)
-        assert isinstance(drink_type, drinks.Drink)
-        self._drink_type = drink_type
-
-    def drink_type(self):
-        return self._drink_type
-
     def __str__(self):
-        return '{} ordered a {} drink (wants {} more) at {}'.format(
+        return '{} ordered a drink (wants {} more) at {}'.format(
             self.get_customer(),
-            self.drink_type().name,
             self.get_customer().drinks_wanted(),
             util.sec_to_tod(self.get_time())
         )
@@ -201,8 +192,7 @@ class PreppedDrink(Event):
         return self._order
 
     def __str__(self):
-        return 'Order of {} drink for {} prepared at {}'.format(
-            self.get_order()[1].name,
-            self.get_order()[0],
+        return 'Drink order for {} prepared at {}'.format(
+            self.get_order().customer,
             util.sec_to_tod(self.get_time())
         )

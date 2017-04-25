@@ -2,7 +2,7 @@ import numpy.random
 
 import constants
 
-from constants import DRINKS_WANTED_MEAN, DRINKS_WANTED_STD_DEV
+from constants import AVG_DRINKS_WANTED, STDDEV_DRINKS_WANTED
 
 class Person(object):
     _number = 1
@@ -30,8 +30,8 @@ class Customer(Person):
     def decide_drinks_wanted():
         drinks_wanted = int(abs(round(
             numpy.random.normal(
-                DRINKS_WANTED_MEAN,
-                DRINKS_WANTED_STD_DEV
+                AVG_DRINKS_WANTED,
+                STDDEV_DRINKS_WANTED
             )
         )))
         if drinks_wanted == 0:

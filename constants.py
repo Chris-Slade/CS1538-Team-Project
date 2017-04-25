@@ -22,9 +22,10 @@ AVG_ARRIVAL_TIME = 180
 
 AVG_SEATING_TIME = 30 # seconds
 
-AVG_DRINK_TIME = 120 # seconds
+AVG_DRINK_TIME = 420 # seconds, derived from data
 
-AVG_DRINK_DELIVERY_TIME = 30 # seconds
+AVG_DELIVERY_TIME    = 50 # seconds, derived from data
+STDDEV_DELIVERY_TIME = 25 # seconds, derived from data
 
-DRINKS_WANTED_MEAN = 2
-DRINKS_WANTED_STD_DEV = 1
+AVG_DRINKS_WANTED    = 2
+STDDEV_DRINKS_WANTED = 1

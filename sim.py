@@ -35,10 +35,11 @@ def getopts():
         'server_wwi'            : constants.SERVER_WWI,
         'bartender_wwi'         : constants.BARTENDER_WWI,
         'seating_time'          : constants.AVG_SEATING_TIME,
-        'delivery_time'         : constants.AVG_DRINK_DELIVERY_TIME,
+        'delivery_time'         : constants.AVG_DELIVERY_TIME,
+        'delivery_time_stddev'  : constants.STDDEV_DELIVERY_TIME,
         'drink_time'            : constants.AVG_DRINK_TIME,
-        'drinks_wanted_mean'    : constants.DRINKS_WANTED_MEAN,
-        'drinks_wanted_std_dev' : constants.DRINKS_WANTED_STD_DEV,
+        'drinks_wanted_mean'    : constants.AVG_DRINKS_WANTED,
+        'drinks_wanted_std_dev' : constants.STDDEV_DRINKS_WANTED,
     }
 
     parser = argparse.ArgumentParser(
@@ -112,6 +113,13 @@ def getopts():
             ' drink.'
     )
     parser.add_argument(
+        '--delivery-time-stddev',
+        type=util.positive_arg,
+        dest='delivery_time_stddev',
+        help='The standard deviation of time it takes for a server to deliver'
+            ' a prepared drink.'
+    )
+    parser.add_argument(
         '--drink-time',
         type=util.positive_arg,
         dest='drink_time',
@@ -133,17 +141,18 @@ def getopts():
     opts = parser.parse_args()
 
     # Override constants with those changed in the command line options.
-    constants.AVG_ARRIVAL_TIME        = opts.arrival_time
-    constants.NUM_SERVERS             = opts.num_servers
-    constants.NUM_BARTENDERS          = opts.num_bartenders
-    constants.SERVER_WWI              = opts.server_wwi
-    constants.BARTENDER_WWI           = opts.bartender_wwi
-    constants.NUM_BAR_SEATS           = opts.num_bar_seats
-    constants.AVG_SEATING_TIME        = opts.seating_time
-    constants.AVG_DRINK_TIME          = opts.drink_time
-    constants.AVG_DRINK_DELIVERY_TIME = opts.delivery_time
-    constants.DRINKS_WANTED_MEAN      = opts.drinks_wanted_mean
-    constants.DRINKS_WANTED_STD_DEV   = opts.drinks_wanted_std_dev
+    constants.AVG_ARRIVAL_TIME     = opts.arrival_time
+    constants.NUM_SERVERS          = opts.num_servers
+    constants.NUM_BARTENDERS       = opts.num_bartenders
+    constants.SERVER_WWI           = opts.server_wwi
+    constants.BARTENDER_WWI        = opts.bartender_wwi
+    constants.NUM_BAR_SEATS        = opts.num_bar_seats
+    constants.AVG_SEATING_TIME     = opts.seating_time
+    constants.AVG_DRINK_TIME       = opts.drink_time
+    constants.AVG_DELIVERY_TIME    = opts.delivery_time
+    constants.STDDEV_DELIVERY_TIME = opts.delivery_time_stddev,
+    constants.AVG_DRINKS_WANTED    = opts.drinks_wanted_mean
+    constants.STDDEV_DRINKS_WANTED = opts.drinks_wanted_std_dev
 
     return opts
 # End of getopts()
@@ -279,7 +288,6 @@ def main():
                         OrderDrink(
                             time=time + time_offset,
                             customer=customer,
-                            drink_type=drinks.random_drink()
                         )
                     )
                     # Seat is taken at the start of the seating process to
@@ -312,7 +320,10 @@ def main():
                     assert outgoing_orders, 'No outgoing orders!'
                     # Server takes the order from the outgoing queue...
                     order = outgoing_orders.pop()
-                    delivery_time = numpy.random.exponential(opts.delivery_time)
+                    delivery_time = numpy.random.normal(
+                        loc=opts.delivery_time,
+                        scale=opts.delivery_time_stddev
+                    )
                     # ... and delivers it to the customer
                     events.push(
                         DeliverDrink(
@@ -340,7 +351,6 @@ def main():
                 incoming_orders.appendleft(
                     drinks.Order(
                         customer=event.get_customer(),
-                        drink_type=event.drink_type(),
                         time_placed=event.get_time()
                     )
                 )
@@ -361,15 +371,13 @@ def main():
                 # Otherwise take an order and prepare it.
                 order = incoming_orders.pop()
                 assert isinstance(order.customer, person.Customer)
-                assert isinstance(order.drink_type, drinks.Drink)
                 LOGGER.info(
-                    '%s is preparing a %s drink for %s at %s',
+                    '%s is preparing a drink for %s at %s',
                     event.get_bartender(),
-                    order.drink_type.name,
                     order.customer,
                     sec_to_tod(event.get_time())
                 )
-                prep_time = order.drink_type.prep_time()
+                prep_time = drinks.Drink.prep_time()
                 events.push(
                     PreppedDrink(
                         time=event.get_time() + prep_time,
@@ -403,7 +411,6 @@ def main():
                         OrderDrink(
                             time=event.get_time() + drink_time,
                             customer=customer,
-                            drink_type=drinks.random_drink()
                         )
                     )
                 else:
