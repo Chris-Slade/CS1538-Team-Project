@@ -29,6 +29,7 @@ def getopts():
     defaults = {
         'log_level'             : 'WARNING',
         'days'                  : 1,
+        'output_json'           : False,
         'arrival_time'          : constants.AVG_ARRIVAL_TIME,
         'num_servers'           : constants.NUM_SERVERS,
         'num_bartenders'        : constants.NUM_BARTENDERS,
@@ -60,6 +61,12 @@ def getopts():
         choices='DEBUG INFO WARNING ERROR CRITICAL'.split(),
         dest='log_level',
         help='Set the global logging level. (default: %s)' % defaults['log_level']
+    )
+    parser.add_argument(
+        '--output-json',
+        dest='output_json',
+        action='store_true',
+        help='Output a JSON representation of the events of the simulation.'
     )
     parser.add_argument(
         '--arrival-time',
@@ -189,23 +196,31 @@ def main():
     LOGGER.info(cons)
     del cons
 
-    with open(str(time_mod.time()) + '_events.json', 'w+t', encoding='utf8') as fp:
-        print('[\n[', file=fp)
-        is_first = True
-        day = 1
-        for event in run_sim(opts):
-            if not is_first:
-                print(',', file=fp)
-            is_first = False
-            print(json.dumps(event), file=fp, end='')
-            if event['type'] == 'HappyHourEnd':
-                if day < opts.days:
-                    print('],\n[', file=fp)
-                else:
-                    print(']', file=fp)
-                day += 1
-                is_first = True
-        print(']', file=fp)
+    if opts.output_json:
+        with open(
+            str(time_mod.time()) + '_events.json',
+            'w+t',
+            encoding='utf8'
+        ) as fp:
+            print('[\n[', file=fp)
+            is_first = True
+            day = 1
+            for event in run_sim(opts):
+                if not is_first:
+                    print(',', file=fp)
+                is_first = False
+                print(json.dumps(event), file=fp, end='')
+                if event['type'] == 'HappyHourEnd':
+                    if day < opts.days:
+                        print('],\n[', file=fp)
+                    else:
+                        print(']', file=fp)
+                    day += 1
+                    is_first = True
+            print(']', file=fp)
+    else:
+        for _ in run_sim(opts):
+            pass
 # End of main()
 
 def run_sim(opts):
