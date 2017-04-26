@@ -1,6 +1,7 @@
 """Run the simulation."""
 
 import argparse
+import json
 import logging
 import numpy.random
 import time as time_mod
@@ -181,8 +182,6 @@ def main():
     global LOGGER
     opts = getopts()
     init(opts)
-    start_time = time_mod.time()
-
     cons = {}
     for constant in dir(constants):
         if constant[0].isupper():
@@ -190,6 +189,27 @@ def main():
     LOGGER.info(cons)
     del cons
 
+    with open(str(time_mod.time()) + '_events.json', 'w+t', encoding='utf8') as fp:
+        print('[\n[', file=fp)
+        is_first = True
+        day = 1
+        for event in run_sim(opts):
+            if not is_first:
+                print(',', file=fp)
+            is_first = False
+            print(json.dumps(event), file=fp, end='')
+            if event['type'] == 'HappyHourEnd':
+                if day < opts.days:
+                    print('],\n[', file=fp)
+                else:
+                    print(']', file=fp)
+                day += 1
+                is_first = True
+        print(']', file=fp)
+# End of main()
+
+def run_sim(opts):
+    start_time = time_mod.time()
     stats = []
 
     for day in range(0, opts.days):
@@ -238,6 +258,7 @@ def main():
 
         while events:
             event = events.pop()
+            yield event.to_dict()
 
             if isinstance(event, HappyHourEnd):
                 LOGGER.info(event)
@@ -439,8 +460,7 @@ def main():
     )
 
     print(stats)
-
-# End of main()
+# End of run_sim()
 
 def handle_seating_queue(waiting_customers, outgoing_orders):
     """Choose whether to handle the seating queue or the outgoing order queue.

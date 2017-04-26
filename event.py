@@ -76,6 +76,12 @@ class Event(object):
             util.sec_to_tod(self._time)
         )
 
+    def to_dict(self):
+        return {
+            'type' : self.__class__.__name__,
+            'time' : self.get_time()
+        }
+
 class TimeEvent(Event):
     """A generic event that can be used to indicate special times (such as the
     turn of an hour).
@@ -107,6 +113,13 @@ class PersonEvent(Event):
             self._person,
             util.sec_to_tod(self._time)
         )
+
+    def to_dict(self):
+        return {
+            'type' : self.__class__.__name__,
+            'time' : self.get_time(),
+            'person' : str(self.get_person())
+        }
 
 ############################### Customer Events ###############################
 
