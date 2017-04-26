@@ -165,6 +165,27 @@ class DeliverDrink(CustomerEvent):
             util.sec_to_tod(self.get_time())
         )
 
+class CustomerSeated(CustomerEvent):
+    """Dummy event for showing when a customer is seated."""
+    def __init__(self, time, customer, server):
+        super().__init__(time=time, customer=customer)
+        self._server = server
+
+    def get_server(self):
+        return self._server
+
+    def to_dict(self):
+        tmp = super().to_dict()
+        tmp['seated_by'] = str(self.get_server())
+        return tmp
+
+    def __str__(self):
+        return '{} was seated by {} at {}'.format(
+            self.get_customer(),
+            self.get_server(),
+            util.sec_to_tod(self.get_time())
+        )
+
 ################################ Server Events ################################
 
 class IdleEventMixin(object):

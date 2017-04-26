@@ -319,29 +319,18 @@ def run_sim(opts):
                     customer    = seating_queue.pop()
                     assert customer.drinks_wanted() >= 1, \
                         "New arrival doesn't want any drinks"
-                    # Customer orders a drink after being seated.
-                    events.push(
-                        OrderDrink(
-                            time=time + time_offset,
-                            customer=customer,
-                        )
-                    )
                     # Seat is taken at the start of the seating process to
                     # prevent it from being preempted.
                     bar.seat_customer(customer)
                     LOGGER.debug('Bar: %s', bar)
                     # Server becomes idle after seating the customer.
                     events.push(ServerIdle(time=time + time_offset, server=server))
-                    stats[day]['seating_wait_time'].add(
-                        time + time_offset - customer.get_arrival_time()
-                    )
-                    LOGGER.info(
-                        '%s was taken from seating line by %s at %s to be'
-                        ' seated at %s',
-                        str(customer),
-                        str(server),
-                        sec_to_tod(time),
-                        sec_to_tod(time + time_offset)
+                    events.push(
+                        CustomerSeated(
+                            time=time + time_offset,
+                            customer=customer,
+                            server=server
+                        )
                     )
                     # Clean namespace
                     del time, server, time_offset, customer
@@ -381,6 +370,19 @@ def run_sim(opts):
                         )
                     )
                     del order
+
+            elif isinstance(event, CustomerSeated):
+                LOGGER.info(event)
+                stats[day]['seating_wait_time'].add(
+                    event.get_time() - event.get_customer().get_arrival_time()
+                )
+                # Customer orders a drink after being seated.
+                events.push(
+                    OrderDrink(
+                        time=event.get_time(),
+                        customer=event.get_customer(),
+                    )
+                )
 
             elif isinstance(event, OrderDrink):
                 LOGGER.info(event)
