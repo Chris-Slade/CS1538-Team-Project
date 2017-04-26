@@ -1,6 +1,7 @@
 """Run the simulation."""
 
 import argparse
+import json
 import logging
 import numpy.random
 import time as time_mod
@@ -28,6 +29,7 @@ def getopts():
     defaults = {
         'log_level'             : 'WARNING',
         'days'                  : 1,
+        'output_json'           : False,
         'arrival_time'          : constants.AVG_ARRIVAL_TIME,
         'num_servers'           : constants.NUM_SERVERS,
         'num_bartenders'        : constants.NUM_BARTENDERS,
@@ -59,6 +61,12 @@ def getopts():
         choices='DEBUG INFO WARNING ERROR CRITICAL'.split(),
         dest='log_level',
         help='Set the global logging level. (default: %s)' % defaults['log_level']
+    )
+    parser.add_argument(
+        '--output-json',
+        dest='output_json',
+        action='store_true',
+        help='Output a JSON representation of the events of the simulation.'
     )
     parser.add_argument(
         '--arrival-time',
@@ -150,7 +158,7 @@ def getopts():
     constants.AVG_SEATING_TIME     = opts.seating_time
     constants.AVG_DRINK_TIME       = opts.drink_time
     constants.AVG_DELIVERY_TIME    = opts.delivery_time
-    constants.STDDEV_DELIVERY_TIME = opts.delivery_time_stddev,
+    constants.STDDEV_DELIVERY_TIME = opts.delivery_time_stddev
     constants.AVG_DRINKS_WANTED    = opts.drinks_wanted_mean
     constants.STDDEV_DRINKS_WANTED = opts.drinks_wanted_std_dev
 
@@ -181,8 +189,6 @@ def main():
     global LOGGER
     opts = getopts()
     init(opts)
-    start_time = time_mod.time()
-
     cons = {}
     for constant in dir(constants):
         if constant[0].isupper():
@@ -190,6 +196,35 @@ def main():
     LOGGER.info(cons)
     del cons
 
+    if opts.output_json:
+        with open(
+            str(time_mod.time()) + '_events.json',
+            'w+t',
+            encoding='utf8'
+        ) as fp:
+            print('[\n[', file=fp)
+            is_first = True
+            day = 1
+            for event in run_sim(opts):
+                if not is_first:
+                    print(',', file=fp)
+                is_first = False
+                print(json.dumps(event), file=fp, end='')
+                if event['type'] == 'HappyHourEnd':
+                    if day < opts.days:
+                        print('],\n[', file=fp)
+                    else:
+                        print(']', file=fp)
+                    day += 1
+                    is_first = True
+            print(']', file=fp)
+    else:
+        for _ in run_sim(opts):
+            pass
+# End of main()
+
+def run_sim(opts):
+    start_time = time_mod.time()
     stats = []
 
     for day in range(0, opts.days):
@@ -238,6 +273,7 @@ def main():
 
         while events:
             event = events.pop()
+            yield event.to_dict()
 
             if isinstance(event, HappyHourEnd):
                 LOGGER.info(event)
@@ -283,29 +319,18 @@ def main():
                     customer    = seating_queue.pop()
                     assert customer.drinks_wanted() >= 1, \
                         "New arrival doesn't want any drinks"
-                    # Customer orders a drink after being seated.
-                    events.push(
-                        OrderDrink(
-                            time=time + time_offset,
-                            customer=customer,
-                        )
-                    )
                     # Seat is taken at the start of the seating process to
                     # prevent it from being preempted.
                     bar.seat_customer(customer)
                     LOGGER.debug('Bar: %s', bar)
                     # Server becomes idle after seating the customer.
                     events.push(ServerIdle(time=time + time_offset, server=server))
-                    stats[day]['seating_wait_time'].add(
-                        time + time_offset - customer.get_arrival_time()
-                    )
-                    LOGGER.info(
-                        '%s was taken from seating line by %s at %s to be'
-                        ' seated at %s',
-                        str(customer),
-                        str(server),
-                        sec_to_tod(time),
-                        sec_to_tod(time + time_offset)
+                    events.push(
+                        CustomerSeated(
+                            time=time + time_offset,
+                            customer=customer,
+                            server=server
+                        )
                     )
                     # Clean namespace
                     del time, server, time_offset, customer
@@ -345,6 +370,19 @@ def main():
                         )
                     )
                     del order
+
+            elif isinstance(event, CustomerSeated):
+                LOGGER.info(event)
+                stats[day]['seating_wait_time'].add(
+                    event.get_time() - event.get_customer().get_arrival_time()
+                )
+                # Customer orders a drink after being seated.
+                events.push(
+                    OrderDrink(
+                        time=event.get_time(),
+                        customer=event.get_customer(),
+                    )
+                )
 
             elif isinstance(event, OrderDrink):
                 LOGGER.info(event)
@@ -438,9 +476,12 @@ def main():
         time_mod.time() - start_time
     )
 
-    print(stats)
-
-# End of main()
+    for day in range(0, opts.days):
+        for (key, item) in stats[day].items():
+            if isinstance(stats[day][key], util.Averager):
+                stats[day][key] = item.get_avg()
+    print(json.dumps(stats))
+# End of run_sim()
 
 def handle_seating_queue(waiting_customers, outgoing_orders):
     """Choose whether to handle the seating queue or the outgoing order queue.
