@@ -158,7 +158,7 @@ def getopts():
     constants.AVG_SEATING_TIME     = opts.seating_time
     constants.AVG_DRINK_TIME       = opts.drink_time
     constants.AVG_DELIVERY_TIME    = opts.delivery_time
-    constants.STDDEV_DELIVERY_TIME = opts.delivery_time_stddev,
+    constants.STDDEV_DELIVERY_TIME = opts.delivery_time_stddev
     constants.AVG_DRINKS_WANTED    = opts.drinks_wanted_mean
     constants.STDDEV_DRINKS_WANTED = opts.drinks_wanted_std_dev
 
