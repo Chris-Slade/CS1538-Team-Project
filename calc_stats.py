@@ -33,6 +33,13 @@ def show_idle_time(key, days):
             )
         )
         print(
+            'Percentage of time spent idle ({} {}):\t{:.4f}'.format(
+                key,
+                person,
+                100 * (persons[person].get_mean() / 7200)
+            )
+        )
+        print(
             'Std. dev. idle time ({} {}):\t{:.4f} seconds'.format(
                 key,
                 person,
