@@ -104,7 +104,7 @@ class Averager(object):
         return self.n
 
     def __repr__(self):
-        return '{ "n" : {:d}, "mean" : {:f}, "stddev" : {:f} }'.format(
+        return '{{ "n" : {:d}, "mean" : {:f}, "stddev" : {:f} }}'.format(
             self.n,
             self.a,
             self.get_stddev()
