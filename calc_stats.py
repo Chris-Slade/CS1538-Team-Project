@@ -24,6 +24,7 @@ def show_idle_time(key, days):
                 persons[person] = util.Averager()
             else:
                 persons[person].add(day[key + '_idle_time'][person])
+    print('Number of {}s:\t{}'.format(key, len(persons)))
     for person in persons:
         print(
             'Average idle time ({} {}):\t{:.4f} seconds'.format(
