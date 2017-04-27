@@ -48,3 +48,20 @@ class TestUtil(unittest.TestCase):
     def test_positive_arg_bad(self):
         for t in ['0', '-1', '-0.0', '1.0']:
             self.assertRaises(argparse.ArgumentTypeError, positive_int_arg, t)
+
+class TestAverager(unittest.TestCase):
+
+    def test_stats(self):
+        data = [
+            91.49134753,  106.25558921, 88.44033268, 97.82358126,  121.53077104,
+            105.94884134, 88.902352,    72.73175503, 103.55505942, 104.44741517
+        ]
+        mean = 98.11
+        stddev = 13.38
+
+        averager = Averager()
+        for x in data:
+            averager.add(x)
+
+        self.assertAlmostEqual(averager.get_mean(), mean, 2)
+        self.assertAlmostEqual(averager.get_stddev(), stddev, 2)

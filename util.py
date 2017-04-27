@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+import math
 
 from time import strptime
 
@@ -69,21 +70,45 @@ def positive_arg(value):
         raise argparse.ArgumentTypeError('argument must be positive')
 
 class Averager(object):
-    """A class for efficiently computing averages of large data sets."""
+    """A class for efficiently computing statistics of large data sets.
+
+    Uses Welford's algorithm, adapted from
+    en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
+    """
 
     def __init__(self):
-        self.a = 0
-        self.i = 0
+        self.n  = 0
+        self.a  = 0.0
+        self.M2 = 0.0
 
-    def add(self, xi):
-        self.i += 1
-        self.a += (xi - self.a) / self.i
+    def add(self, x):
+        self.n  += 1
+        d1      =  x - self.a
+        self.a  += d1 / self.n
+        d2      =  x - self.a
+        self.M2 += d1 * d2
 
-    def get_avg(self):
+    def get_mean(self):
         return self.a
 
+    def get_variance(self):
+        if self.n < 2:
+            return float('NaN')
+        else:
+            return self.M2 / (self.n - 1)
+
+    def get_stddev(self):
+        return math.sqrt(self.get_variance())
+
+    def get_n(self):
+        return self.n
+
     def __repr__(self):
-        return '{ "i" : %d, "avg" : %f }' % (self.i, self.a)
+        return '{ "n" : {:d}, "mean" : {:f}, "stddev" : {:f} }'.format(
+            self.n,
+            self.a,
+            self.get_stddev()
+        )
 
     def __str__(self):
         return str(self.a)

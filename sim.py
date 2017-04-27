@@ -479,8 +479,12 @@ def run_sim(opts):
     for day in range(0, opts.days):
         for (key, item) in stats[day].items():
             if isinstance(stats[day][key], util.Averager):
-                stats[day][key] = item.get_avg()
-    print(json.dumps(stats))
+                stats[day][key] = {
+                    'mean' : item.get_mean(),
+                    'stddev' : item.get_stddev(),
+                    'n' : item.get_n()
+                }
+    print(json.dumps(stats, indent=2))
 # End of run_sim()
 
 def handle_seating_queue(waiting_customers, outgoing_orders):
