@@ -228,6 +228,7 @@ def run_sim(opts):
     stats = []
 
     for day in range(0, opts.days):
+        LOGGER.info(('-' * 20) + ' Day %d ' + ('-' * 20), day + 1)
         # Main event queue, holds events of different types.
         events = EventQueue()
         # Bar
@@ -248,6 +249,11 @@ def run_sim(opts):
 
         # Add an event signaling the end of happy hour
         events.push(HappyHourEnd(time=constants.HAPPY_HOUR_END))
+
+        # Reset numberings
+        person.Customer.reset_numbers()
+        person.Bartender.reset_numbers()
+        person.Server.reset_numbers()
 
         # Generate customer arrival events
         for arrival in generate_arrivals(opts.arrival_time):

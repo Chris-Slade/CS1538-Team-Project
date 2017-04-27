@@ -20,6 +20,10 @@ class Person(object):
     def get_number(self):
         return self._number
 
+    @classmethod
+    def reset_numbers(cl):
+        cl._number = 1
+
 class Customer(Person):
     def __init__(self, arrival_time):
         super().__init__()
