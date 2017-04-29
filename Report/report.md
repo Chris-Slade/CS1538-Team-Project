@@ -109,7 +109,7 @@ operation of the café.
 The time it takes for a server to deliver a finished drink to a customer
 is distributed normally with an average time of 50 seconds and a standard
 deviation of 25 seconds. We obtained this distribution and its parameters
-by putting the data into a histogram, estimating that it is approximately
+by putting the data into a histogram, estimating that it was approximately
 normal, and calculated the corresponding maximum likelihood estimates for the
 parameters of a normal distribution.
 
