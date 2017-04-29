@@ -8,6 +8,7 @@ to get even nicer output.
 """
 
 import json
+import math
 import sys
 
 import util
@@ -58,11 +59,20 @@ def avg_wait_time(key, days):
     avg /= n
     return (n, avg)
 
+def std_wait_time(key, days):
+    n = sum(day[key]['n'] for day in days)
+    variances = sum(
+        day[key]['stddev'] ** 2 * (day[key]['n'] - 1) for day in days
+    )
+    return math.sqrt(variances / (n - 1))
+
 with open(sys.argv[1], 'r') as fp:
     days = json.load(fp)
 
     (swt_n, swt_avg) = avg_wait_time('seating_wait_time', days)
     (dwt_n, dwt_avg) = avg_wait_time('drink_wait_time', days)
+    swt_std = std_wait_time('seating_wait_time', days)
+    dwt_std = std_wait_time('drink_wait_time', days)
 
     avg_customers = util.Averager()
     for day in days:
@@ -76,8 +86,10 @@ with open(sys.argv[1], 'r') as fp:
     print('Total customers seated:', swt_n, sep='\t')
     print('Average customer arrivals:\t{:.4f}'.format(avg_customers.get_mean()))
     print('Average seating time:\t{:.4f} seconds'.format(swt_avg))
+    print('Std. dev. seating time: \t{:.4f} seconds'.format(swt_std))
     print('Total drinks served:', dwt_n, sep='\t')
     print('Average drinks served:\t{:.4f}'.format(avg_drinks.get_mean()))
     print('Average drink wait time:\t{:.4f} seconds'.format(dwt_avg))
+    print('Std. dev. drink wait time: \t{:.4f} seconds'.format(dwt_std))
     show_idle_time('server', days)
     show_idle_time('bartender', days)
