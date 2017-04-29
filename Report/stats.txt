@@ -1,0 +1,215 @@
+Days:                                        	 100
+Total customers seated:                      	 3935
+Average customer arrivals:                   	 40.0100
+Average seating time:                        	 117.5795 seconds
+Std. dev. seating time:                      	 106.1657 seconds
+Total drinks served:                         	 7492
+Average drinks served:                       	 74.3400
+Average drink wait time:                     	 178.7223 seconds
+Std. dev. drink wait time:                   	 92.2016 seconds
+Number of servers:                           	 1
+Average idle time (server 1):                	 2293.0303 seconds
+Percentage of time spent idle (server 1):    	 31.8476
+Std. dev. idle time (server 1):              	 814.8174 seconds
+Number of bartenders:                        	 1
+Average idle time (bartender 1):             	 5683.0303 seconds
+Percentage of time spent idle (bartender 1): 	 78.9310
+Std. dev. idle time (bartender 1):           	 253.7694 seconds
+
+Days:                                        	 100
+Total customers seated:                      	 3947
+Average customer arrivals:                   	 40.4300
+Average seating time:                        	 114.3965 seconds
+Std. dev. seating time:                      	 98.8360 seconds
+Total drinks served:                         	 7478
+Average drinks served:                       	 74.0900
+Average drink wait time:                     	 167.4099 seconds
+Std. dev. drink wait time:                   	 85.6749 seconds
+Number of servers:                           	 1
+Average idle time (server 1):                	 2327.8788 seconds
+Percentage of time spent idle (server 1):    	 32.3316
+Std. dev. idle time (server 1):              	 825.5305 seconds
+Number of bartenders:                        	 2
+Average idle time (bartender 1):             	 6444.8485 seconds
+Percentage of time spent idle (bartender 1): 	 89.5118
+Std. dev. idle time (bartender 1):           	 140.6498 seconds
+Average idle time (bartender 2):             	 6454.2424 seconds
+Percentage of time spent idle (bartender 2): 	 89.6423
+Std. dev. idle time (bartender 2):           	 141.8830 seconds
+
+Days:                                        	 100
+Total customers seated:                      	 3972
+Average customer arrivals:                   	 40.5000
+Average seating time:                        	 113.2369 seconds
+Std. dev. seating time:                      	 95.2646 seconds
+Total drinks served:                         	 7576
+Average drinks served:                       	 75.0800
+Average drink wait time:                     	 165.4195 seconds
+Std. dev. drink wait time:                   	 88.2025 seconds
+Number of servers:                           	 1
+Average idle time (server 1):                	 2234.2424 seconds
+Percentage of time spent idle (server 1):    	 31.0311
+Std. dev. idle time (server 1):              	 762.8131 seconds
+Number of bartenders:                        	 3
+Average idle time (bartender 1):             	 6691.2121 seconds
+Percentage of time spent idle (bartender 1): 	 92.9335
+Std. dev. idle time (bartender 1):           	 108.8368 seconds
+Average idle time (bartender 2):             	 6693.9394 seconds
+Percentage of time spent idle (bartender 2): 	 92.9714
+Std. dev. idle time (bartender 2):           	 133.0400 seconds
+Average idle time (bartender 3):             	 6715.7576 seconds
+Percentage of time spent idle (bartender 3): 	 93.2744
+Std. dev. idle time (bartender 3):           	 103.7471 seconds
+
+Days:                                        	 100
+Total customers seated:                      	 3932
+Average customer arrivals:                   	 39.5400
+Average seating time:                        	 47.2096 seconds
+Std. dev. seating time:                      	 35.4633 seconds
+Total drinks served:                         	 7598
+Average drinks served:                       	 75.3500
+Average drink wait time:                     	 103.1641 seconds
+Std. dev. drink wait time:                   	 32.8311 seconds
+Number of servers:                           	 2
+Average idle time (server 1):                	 4693.3333 seconds
+Percentage of time spent idle (server 1):    	 65.1852
+Std. dev. idle time (server 1):              	 438.0709 seconds
+Average idle time (server 2):                	 4743.0303 seconds
+Percentage of time spent idle (server 2):    	 65.8754
+Std. dev. idle time (server 2):              	 474.8543 seconds
+Number of bartenders:                        	 1
+Average idle time (bartender 1):             	 5684.5455 seconds
+Percentage of time spent idle (bartender 1): 	 78.9520
+Std. dev. idle time (bartender 1):           	 265.7269 seconds
+
+Days:                                        	 100
+Total customers seated:                      	 4011
+Average customer arrivals:                   	 40.3200
+Average seating time:                        	 46.5452 seconds
+Std. dev. seating time:                      	 34.1822 seconds
+Total drinks served:                         	 7789
+Average drinks served:                       	 77.2700
+Average drink wait time:                     	 96.7809 seconds
+Std. dev. drink wait time:                   	 31.0502 seconds
+Number of servers:                           	 2
+Average idle time (server 1):                	 4668.7879 seconds
+Percentage of time spent idle (server 1):    	 64.8443
+Std. dev. idle time (server 1):              	 464.6312 seconds
+Average idle time (server 2):                	 4664.2424 seconds
+Percentage of time spent idle (server 2):    	 64.7811
+Std. dev. idle time (server 2):              	 429.4564 seconds
+Number of bartenders:                        	 2
+Average idle time (bartender 1):             	 6420.9091 seconds
+Percentage of time spent idle (bartender 1): 	 89.1793
+Std. dev. idle time (bartender 1):           	 165.8995 seconds
+Average idle time (bartender 2):             	 6444.8485 seconds
+Percentage of time spent idle (bartender 2): 	 89.5118
+Std. dev. idle time (bartender 2):           	 154.7042 seconds
+
+Days:                                        	 100
+Total customers seated:                      	 3968
+Average customer arrivals:                   	 39.9400
+Average seating time:                        	 46.9746 seconds
+Std. dev. seating time:                      	 34.5949 seconds
+Total drinks served:                         	 7814
+Average drinks served:                       	 77.5600
+Average drink wait time:                     	 94.6522 seconds
+Std. dev. drink wait time:                   	 31.0693 seconds
+Number of servers:                           	 2
+Average idle time (server 1):                	 4626.3636 seconds
+Percentage of time spent idle (server 1):    	 64.2551
+Std. dev. idle time (server 1):              	 481.3808 seconds
+Average idle time (server 2):                	 4688.7879 seconds
+Percentage of time spent idle (server 2):    	 65.1221
+Std. dev. idle time (server 2):              	 451.1669 seconds
+Number of bartenders:                        	 3
+Average idle time (bartender 1):             	 6678.7879 seconds
+Percentage of time spent idle (bartender 1): 	 92.7609
+Std. dev. idle time (bartender 1):           	 130.1747 seconds
+Average idle time (bartender 2):             	 6680.0000 seconds
+Percentage of time spent idle (bartender 2): 	 92.7778
+Std. dev. idle time (bartender 2):           	 113.5512 seconds
+Average idle time (bartender 3):             	 6704.2424 seconds
+Percentage of time spent idle (bartender 3): 	 93.1145
+Std. dev. idle time (bartender 3):           	 100.1742 seconds
+
+Days:                                        	 100
+Total customers seated:                      	 3911
+Average customer arrivals:                   	 39.3100
+Average seating time:                        	 40.6848 seconds
+Std. dev. seating time:                      	 31.7374 seconds
+Total drinks served:                         	 7597
+Average drinks served:                       	 75.4800
+Average drink wait time:                     	 96.5016 seconds
+Std. dev. drink wait time:                   	 28.9030 seconds
+Number of servers:                           	 3
+Average idle time (server 1):                	 5567.5758 seconds
+Percentage of time spent idle (server 1):    	 77.3274
+Std. dev. idle time (server 1):              	 383.4699 seconds
+Average idle time (server 2):                	 5513.3333 seconds
+Percentage of time spent idle (server 2):    	 76.5741
+Std. dev. idle time (server 2):              	 365.4575 seconds
+Average idle time (server 3):                	 5560.0000 seconds
+Percentage of time spent idle (server 3):    	 77.2222
+Std. dev. idle time (server 3):              	 362.3900 seconds
+Number of bartenders:                        	 1
+Average idle time (bartender 1):             	 5685.1515 seconds
+Percentage of time spent idle (bartender 1): 	 78.9604
+Std. dev. idle time (bartender 1):           	 299.8277 seconds
+
+Days:                                        	 100
+Total customers seated:                      	 3932
+Average customer arrivals:                   	 39.4700
+Average seating time:                        	 39.4944 seconds
+Std. dev. seating time:                      	 29.9156 seconds
+Total drinks served:                         	 7695
+Average drinks served:                       	 76.3900
+Average drink wait time:                     	 89.4352 seconds
+Std. dev. drink wait time:                   	 27.5328 seconds
+Number of servers:                           	 3
+Average idle time (server 1):                	 5558.7879 seconds
+Percentage of time spent idle (server 1):    	 77.2054
+Std. dev. idle time (server 1):              	 317.5553 seconds
+Average idle time (server 2):                	 5563.0303 seconds
+Percentage of time spent idle (server 2):    	 77.2643
+Std. dev. idle time (server 2):              	 344.9710 seconds
+Average idle time (server 3):                	 5545.1515 seconds
+Percentage of time spent idle (server 3):    	 77.0160
+Std. dev. idle time (server 3):              	 332.7908 seconds
+Number of bartenders:                        	 2
+Average idle time (bartender 1):             	 6436.9697 seconds
+Percentage of time spent idle (bartender 1): 	 89.4024
+Std. dev. idle time (bartender 1):           	 144.0766 seconds
+Average idle time (bartender 2):             	 6450.6061 seconds
+Percentage of time spent idle (bartender 2): 	 89.5918
+Std. dev. idle time (bartender 2):           	 145.9020 seconds
+
+Days:                                        	 100
+Total customers seated:                      	 4024
+Average customer arrivals:                   	 40.4300
+Average seating time:                        	 40.1198 seconds
+Std. dev. seating time:                      	 31.8839 seconds
+Total drinks served:                         	 7764
+Average drinks served:                       	 77.0300
+Average drink wait time:                     	 87.0216 seconds
+Std. dev. drink wait time:                   	 27.2416 seconds
+Number of servers:                           	 3
+Average idle time (server 1):                	 5456.9697 seconds
+Percentage of time spent idle (server 1):    	 75.7912
+Std. dev. idle time (server 1):              	 358.9652 seconds
+Average idle time (server 2):                	 5515.4545 seconds
+Percentage of time spent idle (server 2):    	 76.6035
+Std. dev. idle time (server 2):              	 390.1969 seconds
+Average idle time (server 3):                	 5538.4848 seconds
+Percentage of time spent idle (server 3):    	 76.9234
+Std. dev. idle time (server 3):              	 391.5442 seconds
+Number of bartenders:                        	 3
+Average idle time (bartender 1):             	 6705.7576 seconds
+Percentage of time spent idle (bartender 1): 	 93.1355
+Std. dev. idle time (bartender 1):           	 118.8730 seconds
+Average idle time (bartender 2):             	 6679.3939 seconds
+Percentage of time spent idle (bartender 2): 	 92.7694
+Std. dev. idle time (bartender 2):           	 129.6606 seconds
+Average idle time (bartender 3):             	 6684.2424 seconds
+Percentage of time spent idle (bartender 3): 	 92.8367
+Std. dev. idle time (bartender 3):           	 123.9659 seconds

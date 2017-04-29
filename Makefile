@@ -22,4 +22,4 @@ lint:
 tags: $(SRC)
 	ctags $(SRC) Simulation-Graphical/script.js
 
-.PHONY: compile lint tags test view
+.PHONY: compile lint tags test
