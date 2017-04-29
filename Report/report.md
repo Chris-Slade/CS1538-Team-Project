@@ -78,8 +78,7 @@ of the drink’s preparation. Eventually a server would take the finished drink
 and deliver it to a table or seat. We performed these observations over the
 course of several days over the same two-hour Happy Hour periods each day, from
 4 to 6 PM. We then collated our data to get average parameters over the course
-of the days we observed, as well as the particular averages of each day so we
-could see how daily variations affected the outcomes we were interested in.
+of the days we observed.
 
 ## Input Modeling
 
