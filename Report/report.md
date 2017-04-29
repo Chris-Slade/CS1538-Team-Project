@@ -87,11 +87,12 @@ remain until a server and a seat are available. Once so, the server seats
 the customer at the bar (taking on average 30 seconds to do so, distributed
 exponentially), and the customer will then place the first of some number of
 orders; on average customers want two drinks, distributed normally with a
-standard deviation of one. (In other words, roughly 16% of customers order one
-drink; 34% order two drinks; 34% order three drinks; and 16% order more than
-three drinks). Customers “make up their minds” as to how many drinks they
-want upon entering the bar, then order and consume that number of drinks, and
-leave promptly afterward.
+standard deviation of one. (In other words, roughly 16% of customers order
+one drink; 34% order two drinks; 34% order three drinks; and 16% order more
+than three drinks). Customers “make up their minds” as to how many drinks
+they want upon entering the bar, then order and consume that number of drinks
+(ordering one, drinking it, ordering another, etc.) and leave promptly
+afterward.
 
 Servers and bartenders look around every thirty seconds to see if there are
 any customers in need of service; if there are none, they idle around for
