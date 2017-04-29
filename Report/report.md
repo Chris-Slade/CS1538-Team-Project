@@ -13,7 +13,6 @@ geometry: margin=1in
 papersize: letter
 indent: true
 fontsize: 12pt
-linestretch: 1.667
 mainfont: Linux Libertine O
 mathfont: Linux Libertine O
 header-includes: |
