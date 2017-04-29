@@ -256,8 +256,8 @@ We use the same process described in [Seating Wait Time][] to calculate the
 relevant statistics, shown in \autoref{tab:drink_wait_time_stats}. Performing
 more paired $t$-tests shows that there is a significant decrease in waiting
 time for drinks when there are two servers instead of one ($p \approx 0.0000$),
-and that the decrease in wait time when a third server is added is also
-significant ($p \approx 0.142$).
+but that the decrease in wait time when a third server is added is not
+significant ($p \approx 0.0647$).
 
 \begin{table}[htpb]
 \centering
@@ -278,7 +278,8 @@ In order to minimize wait time for drinks, the café should consider having
 three servers on staff. The number of bartenders is largely irrelevant,
 provided there is at least one. To minimize seating time, the café should
 have at least two servers, but adding a third does not offer a significant
-advantage.
+advantage. Likewise, having two servers helps to minimize drink wait time, but
+the advantage of adding a third is insignificant.
 
 Having three servers on staff results in servers being idle upwards of 75%
 of the time; having two results in around 65% idle time, and having only one
