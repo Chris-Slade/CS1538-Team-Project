@@ -287,6 +287,10 @@ regarding how many servers to employ based on what percentage of their time the
 servers should be spending doing tasks not directly related to interacting with
 customers.
 
-Either way, the large amount of idle time enjoyed by servers and bartenders
-indicates that the café should focus on increasing the customer arrival rate,
-perhaps by putting out advertisements.
+Having three bartenders on staff results in them being idle upwards of 92% of
+the time; having two results in around 90% idle time; having one results in
+about 79% idle time. The café likely does not need more than one bartender.
+
+The large amount of idle time enjoyed by servers and bartenders indicates that
+the café should focus on increasing the customer arrival rate, perhaps by
+putting out advertisements.
